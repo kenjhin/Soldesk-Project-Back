@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>유저 데이터 테스트</h1>
+  <ul>
+    <% users.forEach(user => { %>
+      <li>아이디 : <%= user.username %></li>
+      <li>이름 : <%= user.name %></li>
+      <li>비밀번호 : <%= user.password %></li>
+      <li>주소 : <%= user.address %></li>
+      <li>권한 : <%= user.authority %></li>
+    <% }); %>
+  </ul>
+
+</body>
+</html>

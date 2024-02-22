@@ -1,14 +1,57 @@
-const express = require('express')
-    const app = express()
+const express = require('express');
+const app = express();
+const ejs = require('ejs');
 
-// http://localhost:3030   
+const mysql      = require('mysql');
+const connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'soldesk',
+  password : '1234',
+  database : 'soldesk'
+});
 
-app.listen(3030, () => {
-        console.log('솔데스크 팀 프로젝트 Node.js 서버실행')
-        console.log('" 서버 실행이 성공하였습니다~! ^_^ "')
-     })
+app.set('view engine', 'ejs');
 
-     app.get('/',  (요청,응답) => {
+connection.connect();
 
-        응답.sendFile(__dirname + '/index.html')
-    })
+// connection.query('SELECT * from user', (error, rows, fields) => {
+//   if (error) throw error;
+//   console.log('Mysql DB연결 성공');
+//   console.log('DB rows :  ', rows);
+// });
+
+
+
+
+//  메인페이지
+
+app.get('/',  (req,res) => {
+
+  res.sendFile(__dirname + '/index.html')
+});
+
+
+// users 페이지
+
+app.get('/users', (req, res) => {
+    connection.query('SELECT * FROM user', (error, rows, fields) => {
+    if (error) throw error;
+    // EJS 템플릿을 이용하여 데이터를 HTML로 렌더링
+    res.render('users', { users: rows });
+    });
+});
+
+
+
+
+// 서버실행 : http://localhost:3000
+app.listen(3000, () => {
+        console.log('node.js 서버 실행 성공');
+
+        process.on('SIGINT', () => {
+          console.log('Server is shutting down');
+          connection.end();
+          process.exit();
+        });
+     });
+    
