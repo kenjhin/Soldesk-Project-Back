@@ -65,25 +65,24 @@ app.post('/signup', (req,res) => {
         const {
           username,
           password,
-          confirmPassword,
+          pwCheck,
           name,
           address,
-          detailedAddress,
           authority,
           icon,
         } = req.body;
                 //  리액트에서 받아온 post data의 유효성 검사.
-                if (!username || !password || !confirmPassword || password !== confirmPassword) {
+                if (!username || !password || !pwCheck || password !== pwCheck) {
                   return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
                 }
                 // mysql 회원가입 쿼리
                 const query = `
-                    INSERT INTO user (username, password, name, address, detailedAddress, authority)
+                    INSERT INTO user (username, password, name, address, authority, icon)
                     VALUES (?, ?, ?, ?, ?, ?)
                   `;
                     //my sql 쿼리 실행문
                   connection.query(query, 
-                    [username, password, name, address, detailedAddress, authority, icon], 
+                    [username, password, name, JSON.stringify(address), authority, icon], 
                     (error, results) => {
                     if (error) {
                       console.error('DB확인 요망 post요청 회원가입 기능오류:', error);
@@ -116,11 +115,12 @@ app.post('/login', (req, res) => {
     }
 
     if (results.length > 0) {
-      // DB와 데이터가 일치하면 세션을 부여(ture)
+      // DB와 데이터가 일치하면 세션을 부여(true)
       req.session.isLoggedIn = true;
       req.session.username = username;
 
-      return res.status(200).json({ success: true });
+      // 리다이렉트와 세션 정보를 클라이언트에 응답
+      return res.status(200).json({ success: true, userInfo: results[0], message: '로그인 성공', redirectPath: '/' });
     } else {
       // 유효하지 않은 자격 증명일시의 세션설정 오류의 에러 메세지
       return res.status(401).json({ success: false, message: '유효하지 않은 자격 증명' });
@@ -129,6 +129,21 @@ app.post('/login', (req, res) => {
 });
 
 
+
+
+// [0229] 로그아웃 API
+app.post('/logout', (req, res) => {
+  // 세션 파기하고 로그아웃 처리
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('세션 파기 오류:', err);
+      return res.status(500).json({ error: '로그아웃 중 오류가 발생했습니다.' });
+    }
+
+    // 클라이언트에게 로그아웃 성공 및 리다이렉트를 응답
+    res.status(200).json({ success: true, message: '로그아웃 성공', redirectPath: '/login' });
+  });
+});
 
 
 
