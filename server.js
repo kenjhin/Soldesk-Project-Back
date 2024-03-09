@@ -142,6 +142,7 @@ app.get('/getUserInfo', (req, res) => {
   if (req.session && req.session.isLoggedIn) {
     const username = req.session.username;
     console.log(`Fetching user info for: ${username}`); // 로깅 추가
+
     connection.query('SELECT * FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('사용자 정보 가져오기 실패:', error);
