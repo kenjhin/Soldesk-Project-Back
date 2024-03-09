@@ -149,8 +149,6 @@ app.get('/checkSession', (req, res) => {
 
 
 
-
-
 app.post('/logout', (req, res) => {
   if (req.session) {
     req.session.destroy(err => {
@@ -166,6 +164,31 @@ app.post('/logout', (req, res) => {
 });
 
 
+app.get('/userData', (req, res) => {
+  if (req.session && req.session.isLoggedIn) {
+    // 세션 확인: 로그인 상태
+    const username = req.session.username;
+
+    // MySQL에서 사용자 정보 조회 쿼리 실행
+    connection.query('SELECT username,password, name, address FROM user WHERE username = ?', [username], (error, results) => {
+      if (error) {
+        console.error('DB 조회 오류:', error);
+        return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });
+      }
+
+      if (results.length > 0) {
+        const user = results[0];
+
+        return res.json({ success: true, user });
+      } else {
+        return res.status(404).json({ success: false, message: '유저 정보를 찾을 수 없습니다.' });
+      }
+    });
+  } else {
+    // 세션 미존재: 비로그인 상태
+    res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+  }
+});
 
 
 
