@@ -147,53 +147,22 @@ app.get('/checkSession', (req, res) => {
 });
 
 
-// // <GET> 유저데이터 API
-// app.get('/getUserInfo', (req, res) => {
-//   if (req.session && req.session.isLoggedIn) {
-//     const username = req.session.username;
-//     console.log(`Fetching user info for: ${username}`); // 로깅 추가
-//     connection.query('SELECT * FROM user WHERE username = ?', [username], (error, results) => {
-//       if (error) {
-//         console.error('사용자 정보 가져오기 실패:', error);
-//         return res.status(500).json({ success: false, message: '사용자 정보를 가져오는 중 오류가 발생했습니다.' });
-//       }
-
-//       if (results.length > 0) {
-//         console.log(`User info found for: ${username}`); // 로깅 추가
-//         // 주소 필드를 객체로 변환하여 응답에 추가
-//         results[0].address = JSON.parse(results[0].address || '{}');
-//         return res.status(200).json({ success: true, userInfo: results[0] });
-//       } else {
-//         return res.status(404).json({ success: false, message: '사용자 정보를 찾을 수 없습니다.' });
-//       }
-//     });
-//   } else {
-//     console.log('No session or user is not logged in'); // 로깅 추가
-//     return res.status(401).json({ success: false, message: '세션이 없습니다.' });
-//   }
-// });
 
 
 
 
-
-
-//<POST> 로그아웃 API
 app.post('/logout', (req, res) => {
-  // 쿠키 삭제
-  res.clearCookie('isLoggedIn');
-  res.clearCookie('username');
-
-  // 세션 파기
-  req.session.destroy(function(err) {
-    if(err) {
-      console.error('Session destroy error:', err);
-      return res.status(500).json({ success: false, message: '로그아웃 처리 중 오류 발생' });
-    }
-
-    // 세션 파기 후, 클라이언트에 성공 응답 전송
-    res.status(200).json({ success: true, message: '로그아웃 성공', redirectPath: '/login' });
-  });
+  if (req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        res.status(500).send({ success: false, message: '로그아웃 실패' });
+      } else {
+        res.send({ success: true, message: '로그아웃 성공' });
+      }
+    });
+  } else {
+    res.status(200).send({ success: true, message: '이미 로그아웃 상태' });
+  }
 });
 
 
