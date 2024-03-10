@@ -1,6 +1,3 @@
 [submodule "Soldesk-Project-Front"]
 	path = Soldesk-Project-Front
 	url = https://github.com/kenjhin/Soldesk-Project-Front.git
-[submodule "client"]
-	path = client
-	url = https://github.com/kenjhin/Soldesk-Project-Front.git
