@@ -16,7 +16,6 @@ function App() {
   const [logined, setLogined] = useState(false);
   const navigate = useNavigate();
 
-
   // 로그인 체크
   useEffect(() => {
     const checkSession = async () => {
@@ -25,8 +24,10 @@ function App() {
         if (response.data.success) {
           setLogined(true);
           navigate('/home'); // 로그인 성공 시 /home으로 직접 리다이렉트
+          console.log('로그인성공')
         } else {
           navigate('/login');
+          console.log('로그인실패')
         }
       } catch (error) {
         console.error('세션 확인 요청 실패:', error);
@@ -35,7 +36,7 @@ function App() {
     };
   
     checkSession();
-  }, [navigate]);
+  },[navigate]);
 
 
 
@@ -44,10 +45,13 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login setLogined={setLogined} />} />
-      <Route path="/home/*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
-      {/* 기본 경로 설정 */}
+      <Route path="*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
+      {/* {/* 기본 경로 설정 */}
       <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
     </Routes>
+  //   <Routes>
+    
+  // </Routes>
   );
 }
 

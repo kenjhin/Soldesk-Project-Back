@@ -129,6 +129,7 @@ const Messenger = () => {
           <div className='messenger-group-header' onClick={() => toggleGroup(group.groupId)}>
             <span>{group.groupName}</span>
           </div>
+        {/* 그룹 열려있으면 그룹안에 친구들 보여주기 */}
         {expandedGroups.includes(group.groupId) && (group.friendsId.map((friendId, i) => (
           <div key={i} className='messenger-friend-list' onClick={() => openChatModal(friendId)}>
             <div className='friend-icon'>
