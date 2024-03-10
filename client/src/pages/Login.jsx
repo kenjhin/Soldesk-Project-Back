@@ -34,6 +34,7 @@ function Login() {
 
       if (response.data.success) {
         // 로그인 성공: 리다이렉트 경로로 이동
+        console.log('로그인 성공 Login.jsx')
         navigate(response.data.redirectPath || '/');
       } else {
         // 로그인 실패: 오류 메시지 처리

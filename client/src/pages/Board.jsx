@@ -30,19 +30,19 @@ const Board = () => {
   const [postsPerPage] = useState(20);                // 페이지 당 포스트 수 : 20개
   
   useEffect(() => {
-    fetchData();
+    // fetchData();
   }, [currentPage], [data]);
   
-  const fetchData = async () => {
-    try {
-      const response = await fetch('http://localhost:3001/board');
-      const result = await response.json();
-      console.log('Fetched Data:', result);
-      setData(result);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch('http://localhost:3001/board');
+  //     const result = await response.json();
+  //     console.log('Fetched Data:', result);
+  //     setData(result);
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+  // };
 
   // 페이지 변경
   const paginate = (pageNumber) => setCurrentPage(pageNumber);

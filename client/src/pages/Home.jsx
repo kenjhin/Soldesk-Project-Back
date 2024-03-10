@@ -22,7 +22,7 @@ function Home({setLogined}) {
     username: '',
     password: '',
     confirmPassword: '',
-    name: '',
+    nickname: '',
     address: {
       zonecode: '',
       fullAddress: '',
@@ -58,7 +58,6 @@ function Home({setLogined}) {
 
 
   // 로그아웃 기능 임시 함수
-  
   const handleLogout = async () => {
     console.log("로그아웃 시도");
     try {
@@ -109,7 +108,7 @@ function Home({setLogined}) {
             img={<img className="userIcon" src={userData.icon} alt="" />}
           />
           <div className="nameBox">
-            <p className="nickname">{userData.name}</p>
+            <p className="nickname">{userData.nickname}</p>
             <p className="profileMessage">"{userData.profileMessage}"</p>
           </div>
           <button className="logoutBtn" onClick={handleLogout}>

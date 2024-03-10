@@ -16,8 +16,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
@@ -71,23 +71,23 @@ app.get('/',  (req,res) => {
 // <POST> 회원가입 API
 app.post('/signup', (req, res) => {
   // 요청 본문에서 데이터 추출
-  const { username, password, confirmPassword, name, address, authority, icon } = req.body;
+  const { username, password, confirmPassword, nickname, address, authority, icon } = req.body;
   const addressString = JSON.stringify(address);
   // 입력값 유효성 검사
   if (!username || !password || !confirmPassword || password !== confirmPassword) {
     return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
   }
 
-    // MySQL 회원가입 쿼리
+  // MySQL 회원가입 쿼리
   const query = `
-  INSERT INTO user (username, password, name, address, authority, icon)
+  INSERT INTO user (username, password, nickname, address, authority, icon)
   VALUES (?, ?, ?, ?, ?, ?)
 `;
 
   // MySQL 쿼리 실행, addressString을 쿼리 파라미터로 전달
-connection.query(query, 
-  [username, password, name, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
-  (error, results) => {
+  connection.query(query, 
+    [username, password, nickname, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
+    (error, results) => {
 
       if (error) {
         console.error('DB확인 요망 post요청 회원가입 기능오류:', error);
@@ -170,7 +170,7 @@ app.get('/userData', (req, res) => {
     const username = req.session.username;
 
     // MySQL에서 사용자 정보 조회 쿼리 실행
-    connection.query('SELECT username,password, name, address FROM user WHERE username = ?', [username], (error, results) => {
+    connection.query('SELECT username,password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('DB 조회 오류:', error);
         return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });
