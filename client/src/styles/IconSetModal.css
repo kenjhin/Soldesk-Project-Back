@@ -1,0 +1,29 @@
+.icon-modal-btn-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+.icon-modal-open-btn{
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+  
+.icon-modal-container {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.icon-modal-content {
+  background-color: #02080e;
+  width: 1000px;
+  height: 600px;
+}
