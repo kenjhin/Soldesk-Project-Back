@@ -23,7 +23,8 @@
     "memorystore": "^1.6.7",
     "mysql": "^2.18.1",
     "mysql2": "^3.9.1",
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "react-scripts": "^5.0.1"
   },
   "devDependencies": {
     "concurrently": "^4.0.1"
