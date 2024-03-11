@@ -24,7 +24,7 @@ const PostDetail = () => {
       id: 3,
       postId: 2, 
       writer: 'asd',
-      content: '윗댓특) ㅄ임',
+      content: '윗댓특) ㅄ임ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
       date: '24.03.05 09.11'
     }]);
     const [currentComment, setCurrentComment] = useState({
@@ -112,7 +112,7 @@ const PostDetail = () => {
                                 borderRadius: '50%', marginRight: '8px'}}></div>
                     <div style={{display: 'flex', flexWrap: 'wrap', flexBasis: '100%'}}> 
                       <p style={{flexBasis: '100%', margin: '0px', fontWeight: 'bold'}}>{data.writer}</p>
-                      <p style={{flexBasis: '100%', margin: '0px', fontSize: '15px'}}>{data.content}</p>
+                      <p style={{flexBasis: '100%', margin: '0px', fontSize: '15px', wordBreak: 'break-all'}}>{data.content}</p>
                       <div style={{display: 'flex', flexBasis: '100%'}}>
                         <p style={{fontSize: '12px', opacity: '0.5', marginRight: '10px'}}>{data.date}</p>
                         <p style={{fontSize: '12px', opacity: '0.5'}} onClick={() => {}}>답글쓰기</p>
