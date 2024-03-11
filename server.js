@@ -193,11 +193,10 @@ app.get('/userData', (req, res) => {
 });
 
 
-// 게시물 작성 POST 
+// 게시물 작성 POST
 app.post('/api/posts', (req, res) => {
   const { title, content, boardId, writerId } = req.body;
 
-  // writerId를 사용하여 user 테이블에서 nickname 조회
   const userQuery = 'SELECT nickname FROM user WHERE id = ?';
   connection.query(userQuery, [writerId], (error, results) => {
     if (error || results.length === 0) {
@@ -207,9 +206,8 @@ app.post('/api/posts', (req, res) => {
 
     const writerNickname = results[0].nickname;
 
-    // 게시글 정보를 board 테이블에 저장하는 쿼리
-    const insertQuery = 'INSERT INTO board (title, content, user_id, writer, created_at) VALUES (?, ?, ?, ?, NOW())';
-    connection.query(insertQuery, [title, content, writerId, writerNickname], (insertError, insertResults) => {
+    const insertQuery = 'INSERT INTO board (title, content, user_id, board_id, writer, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+    connection.query(insertQuery, [title, content, writerId, boardId, writerNickname], (insertError, insertResults) => {
       if (insertError) {
         console.error('Insert post error:', insertError);
         return res.status(500).json({ message: 'Insert post error' });
@@ -217,6 +215,23 @@ app.post('/api/posts', (req, res) => {
 
       res.status(201).json({ message: 'Post created successfully' });
     });
+  });
+});
+
+
+// 게시물 리스트 가져오기 GET
+app.get('/api/posts/list', (req, res) => {
+  const { boardId } = req.query;
+
+  // board_id에 해당하는 게시물 쿼리 전부 조회하기
+  const query = 'SELECT post_id, title, writer, created_at, views, likes FROM board WHERE board_id = ? ORDER BY created_at DESC';
+  connection.query(query, [boardId], (error, results) => {
+    if (error) {
+      console.error('Fetch posts error:', error);
+      return res.status(500).json({ message: 'Error fetching posts' });
+    }
+
+    res.json(results);
   });
 });
 

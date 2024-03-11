@@ -40,9 +40,9 @@ td{
 }
 
 .boardTable{
-    display: flex;
+    /* display: flex;
     flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: center; */
     thead{
         border-top: 2px rgba(255,255,255, 0.2) solid;
         border-bottom: 1px rgba(255,255,255, 0.1) solid;
