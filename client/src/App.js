@@ -55,9 +55,7 @@ function App() {
       <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
     </Routes>
     </UserProvider>
-  //   <Routes>
-    
-  // </Routes>
+
   );
 }
 
