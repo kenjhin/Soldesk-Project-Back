@@ -14,6 +14,8 @@ export default class SimpleSlider extends Component {
       slidesToScroll: 1,
       arrows: false,
       dotsClass: "slick-dots",
+      autoplay: true,
+      autoplaySpeed: 4000,
     };
     return (
       <>

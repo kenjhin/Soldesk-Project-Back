@@ -15,8 +15,8 @@ const Board = () => {
   },{
     boardId: 2,
     id: 2,
-    title: ["살려주세요"],
-    content: "존나힘들어요 ㅅㅂ ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ",
+    title: ["살려주asdas세요ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"],
+    content: "존나힘들어요 ㅅㅂ ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     writer: "2등",
     date: "2024.02.21",
     views: 0,
@@ -91,7 +91,7 @@ const Board = () => {
                   to={`/board/${post.boardId}/${post.id}`}
                   state={{ post }}
                 >
-                  {post.title[0]}
+                  <span>{post.title[0]}</span>
                 </Link>
                 </td>
                 <td className="td_writer">{post.writer}</td>
