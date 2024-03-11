@@ -9,6 +9,8 @@ import hamster from "./assets/img/hamster.jpg";
 // pages
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Board from "./pages/Board";
+
 
 // components
 
@@ -24,7 +26,10 @@ function App() {
         const response = await axios.get('http://localhost:3001/checkSession', { withCredentials: true });
         if (response.data.success) {
           setLogined(true);
-          navigate('/home'); // 로그인 성공 시 /home으로 직접 리다이렉트
+          // 현재 경로가 로그인 페이지나 루트 경로일 때만 /home으로 리다이렉트
+          if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            navigate('/home');
+          }
         } else {
           navigate('/login');
         }
@@ -47,6 +52,7 @@ function App() {
       <Route path="/home/*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
       {/* 기본 경로 설정 */}
       <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
+      <Route path="/board/:boardId" element={logined ? <Board /> : <Navigate to="/login" replace />} />
     </Routes>
   );
 }
