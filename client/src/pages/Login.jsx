@@ -8,6 +8,7 @@ import arrow from "../assets/img/login/arrow_right.png"
 import riot_logo from "../assets/img/login/riot_logo.png"
 import TextInput from "../components/TextInput.jsx"
 import SignUpModal from "../components//modals/SignUpModal.jsx"
+import SimpleSlider from "../components/SimpleSlider.jsx";
 
 function Login() {
   const navigate = useNavigate();
@@ -62,8 +63,9 @@ function Login() {
         <button className="singUpBtn" onClick={() => setModalShow(true)}>계정 생성</button>
         <SignUpModal show={modalShow} onHide={() => setModalShow(false)}/>
       </div>
-      <div className="loginBannerContainer">
-        <img className="loginBanner" src={loginBanner} alt="잉 기무링"/>
+      <div className="loginBanner-container">
+        <SimpleSlider/>
+        {/* 배너 크기 1920x1080  높이*(4/3) */}
       </div>
     </div>
   )

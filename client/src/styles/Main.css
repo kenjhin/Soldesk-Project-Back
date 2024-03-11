@@ -68,8 +68,9 @@ td{
     color: white;
 }
 
-.slideBox{
+.slide-container{
     width: 1000px;
+    position: relative;
     img{
         width: 1000px;
         height: auto;
@@ -263,6 +264,4 @@ td{
             }
         }
       }
-    
   }
-

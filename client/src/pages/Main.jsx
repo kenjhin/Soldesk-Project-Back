@@ -6,6 +6,8 @@ import logo from "../assets/img/login/login_banner.png"
 import Board from './Board';
 import PostDetail from './PostDetail';
 import Post from './Post';
+import Slider from 'react-slick';
+import SimpleSlider from '../components/SimpleSlider';
 
 const Main = () => {
   const [posts, setPosts] = useState();
@@ -30,8 +32,8 @@ const Main = () => {
                 height: "100%",
               }}
             >
-              <div className="slideBox">
-                <img src={logo} alt="" />
+              <div className="slide-container">
+                <SimpleSlider/>
               </div>
               <div className="hotPostBox" style={{ color: "white" }}>
                 <div className='host-post'>

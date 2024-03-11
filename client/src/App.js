@@ -32,7 +32,6 @@ function App() {
           }
         } else {
           navigate('/login');
-          console.log('로그인실패')
         }
       } catch (error) {
         console.error('세션 확인 요청 실패:', error);
