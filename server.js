@@ -193,6 +193,32 @@ app.get('/userData', (req, res) => {
 });
 
 
+// 게시물 작성 POST 
+app.post('/api/posts', (req, res) => {
+  const { title, content, boardId, writerId } = req.body;
+
+  // writerId를 사용하여 user 테이블에서 nickname 조회
+  const userQuery = 'SELECT nickname FROM user WHERE id = ?';
+  connection.query(userQuery, [writerId], (error, results) => {
+    if (error || results.length === 0) {
+      console.error('User fetch error:', error);
+      return res.status(500).json({ message: 'User fetch error' });
+    }
+
+    const writerNickname = results[0].nickname;
+
+    // 게시글 정보를 board 테이블에 저장하는 쿼리
+    const insertQuery = 'INSERT INTO board (title, content, user_id, writer, created_at) VALUES (?, ?, ?, ?, NOW())';
+    connection.query(insertQuery, [title, content, writerId, writerNickname], (insertError, insertResults) => {
+      if (insertError) {
+        console.error('Insert post error:', insertError);
+        return res.status(500).json({ message: 'Insert post error' });
+      }
+
+      res.status(201).json({ message: 'Post created successfully' });
+    });
+  });
+});
 
 
 
