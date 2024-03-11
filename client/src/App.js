@@ -48,13 +48,12 @@ function App() {
 
   return (
     <UserProvider>
-    <Routes>
-      <Route path="/login" element={<Login setLogined={setLogined} />} />
-      <Route path="*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
-      {/* {/* 기본 경로 설정 */}
-      <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
-      <Route path="/board/:boardId" element={logined ? <Board /> : <Navigate to="/login" replace />} />
-    </Routes>
+      <Routes>
+        <Route path="/login" element={<Login setLogined={setLogined} />} />
+        <Route path="*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
+        {/* {/* 기본 경로 설정 */}
+        <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
+      </Routes>
     </UserProvider>
   //   <Routes>
     
