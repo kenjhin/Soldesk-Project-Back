@@ -26,6 +26,14 @@ function Login() {
     setPassword(value);
   }
 
+  const handleKeyDown = (e) => {
+    // 엔터누를 때 + 공백방지
+    if (e.key === 'Enter') {
+      e.preventDefault(); // 기본 엔터 동작 방지
+      handleLoginClick();
+    }
+  };
+
   const handleLoginClick = async () => {
     try {
       const response = await axios.post('http://localhost:3001/login', {
@@ -53,19 +61,20 @@ function Login() {
         <img className="loginLogo" src={riot_logo} alt=""/>
         <div className="loginLoginText">로그인</div>
         <div className="loginInputArea"> 
-          <TextInput label="계정이름" value={username} onInputChange={handleTextInputValueChange}/>
-          <TextInput label="비밀번호" type="password" value={password} onInputChange={handlePasswordChange}/>
+          <TextInput label="계정이름" value={username} onInputChange={handleTextInputValueChange} onKeyDown={handleKeyDown}/>
+          <TextInput label="비밀번호" type="password" value={password} onInputChange={handlePasswordChange} onKeyDown={handleKeyDown}/>
           <div className="idCheckboxContainer">
             <label className="idCheckLabel"><input className="idCheckbox" type="checkbox"/>로그인 상태 유지</label>
           </div>
         </div>
-        <button className="loginBtnContainer" onClick={handleLoginClick}><img className="loginBtn" src={arrow} alt=""/></button>
+        <button className="loginBtnContainer" onClick={handleLoginClick} >
+          <img className="loginBtn" src={arrow} alt=""/>
+        </button>
         <button className="singUpBtn" onClick={() => setModalShow(true)}>계정 생성</button>
         <SignUpModal show={modalShow} onHide={() => setModalShow(false)}/>
       </div>
       <div className="loginBanner-container">
         <SimpleSlider/>
-        {/* 배너 크기 1920x1080  높이*(4/3) */}
       </div>
     </div>
   )
