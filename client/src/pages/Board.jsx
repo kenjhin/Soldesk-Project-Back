@@ -32,7 +32,6 @@ const Board = () => {
   // useEffect(() => {
   //   fetchData();
   // }, [currentPage], [data]);
-  
   // const fetchData = async () => {
   //   try {
   //     const response = await fetch('http://localhost:3001/board');
