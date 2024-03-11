@@ -11,7 +11,7 @@ const Board = () => {
     writer: "김기모띵",
     date: "2024.02.21",
     views: 0,
-    like: 0,
+    like: 1,
   },{
     boardId: 2,
     id: 2,
