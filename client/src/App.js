@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
+import { UserProvider } from './contexts/UserContext';
 // css
 import "./styles/App.css";
 // img
@@ -47,6 +48,7 @@ function App() {
 
 
   return (
+    <UserProvider>
     <Routes>
       <Route path="/login" element={<Login setLogined={setLogined} />} />
       <Route path="*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
@@ -54,6 +56,7 @@ function App() {
       <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
       <Route path="/board/:boardId" element={logined ? <Board /> : <Navigate to="/login" replace />} />
     </Routes>
+    </UserProvider>
   //   <Routes>
     
   // </Routes>
