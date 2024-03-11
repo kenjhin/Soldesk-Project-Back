@@ -46,7 +46,7 @@ const Messenger = () => {
     friends: [{
       groupId: 1,
       groupName: "일반",
-      friendsId: ['잼민이', '아트록스', '세주아니']
+      friendsId: ['잼민이', '아트록스', '세주아니', '기모띠', '앙기모띠', '안기모띠', '흑흑냐', '케케냐', '탈룰라', '음', 'ㅇㄴㅁ', 'ㅁㄴㅇㅁㄴㅇ']
     },{
       groupId: 2,
       groupName: "안친함",

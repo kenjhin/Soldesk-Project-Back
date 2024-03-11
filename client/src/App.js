@@ -23,11 +23,11 @@ function App() {
         const response = await axios.get('http://localhost:3001/checkSession', { withCredentials: true });
         if (response.data.success) {
           setLogined(true);
-          navigate('/home'); // 로그인 성공 시 /home으로 직접 리다이렉트
-          console.log('로그인성공')
+          if(window.location.pathname==='/login' || window.location.pathname === '/'){
+            navigate('/home'); // 로그인 성공 시 /home으로 직접 리다이렉트
+          }
         } else {
           navigate('/login');
-          console.log('로그인실패')
         }
       } catch (error) {
         console.error('세션 확인 요청 실패:', error);
