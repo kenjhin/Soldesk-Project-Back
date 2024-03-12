@@ -104,7 +104,7 @@ function Home({setLogined}) {
           </div>
           )}
           <button className="logoutBtn" onClick={handleLogout}>
-            logout
+            로그아웃
           </button>
         </div>
       </header>

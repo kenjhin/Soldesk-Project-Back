@@ -1,0 +1,1 @@
+import icon_hamster from "../assets/img/hamster.jpg"
