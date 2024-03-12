@@ -10,6 +10,7 @@ const Board = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(20);
+
   // 컴포넌트 마운트 시 게시물 리스트 가져오기
   useEffect(() => {
     const fetchData = async () => {
@@ -23,6 +24,8 @@ const Board = () => {
     };
     fetchData();
   }, [boardId]); // boardId가 변경될 때마다 fetchData 함수 실행
+
+
 
   // 페이지 변경 함수
   const paginate = (pageNumber) => setCurrentPage(pageNumber);

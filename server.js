@@ -16,8 +16,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -224,7 +224,7 @@ app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
 
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT post_id, title, writer, created_at, views, likes FROM board WHERE board_id = ? ORDER BY created_at DESC';
+  const query = 'SELECT post_id, title, content, writer, created_at, views, likes FROM board WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
@@ -234,6 +234,71 @@ app.get('/api/posts/list', (req, res) => {
     res.json(results);
   });
 });
+
+
+// <PUT> 게시판 수정 API
+app.put('/api/posts/:id', (req, res) => {
+  const { id } = req.params; // URL에서 게시물 ID 추출
+  const { title, content } = req.body; // 요청 본문에서 제목과 내용 추출
+
+  // 게시물이 존재하는지 확인하는 쿼리
+  const checkQuery = 'SELECT * FROM board WHERE post_id = ?';
+  connection.query(checkQuery, [id], (checkError, checkResults) => {
+    if (checkError) {
+      console.error('게시물-DB 체크 오류:', checkError);
+      return res.status(500).json({ message: '게시물 찾기에 실패했음.' });
+    }
+
+    if (checkResults.length === 0) {
+      return res.status(404).json({ message: '게시물이 존재하지 않습니다.' });
+    }
+
+    // 게시물 업데이트 쿼리
+    const updateQuery = 'UPDATE board SET title = ?, content = ? WHERE post_id = ?';
+    connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
+      if (updateError) {
+        console.error('게시물 수정 에러:', updateError);
+        return res.status(500).json({ message: '게시물 수정에 실패 했습니다.' });
+      }
+
+      if (updateResults.affectedRows === 0) {
+        // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+        return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+      }
+
+      res.json({ message: '게시물이 성공적으로 수정되었습니다.' });
+    });
+  });
+});
+
+
+
+
+
+
+// <DELETE> 게시물 삭제하기 
+app.delete('/api/posts/:id', (req, res) => {
+  const { id } = req.params; // URL에서 게시물 ID 추출
+
+  const deleteQuery = 'DELETE FROM board WHERE post_id = ?';
+  connection.query(deleteQuery, [id], (deleteError, deleteResults) => {
+    if (deleteError) {
+      console.error('게시물 삭제 에러:', deleteError);
+      return res.status(500).json({ message: '게시물 삭제에 실패 했습니다.' });
+    }
+
+    if (deleteResults.affectedRows === 0) {
+      return res.status(404).json({ message: '게시물이 존재하지 않거나 이미 삭제되었습니다.' });
+    }
+
+    res.json({ message: '게시물이 성공적으로 삭제되었습니다.' });
+  });
+});
+
+
+
+
+
 
 
 
