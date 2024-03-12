@@ -4,6 +4,7 @@ import '../styles/App.css';
 import '../styles/Main.css';
 
 const Board = () => {
+
   const location = useLocation();
   const boardId = location.state?.boardId;
   const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
@@ -60,16 +61,12 @@ const Board = () => {
                 {/* 게시글 번호를 순서대로 표시 */}
                 <td className="td_id">{index + 1}</td> 
                 <td className="td_title">
-                  {/* 게시판 URL 링크 로직 설정. */}
-                   {/* 순서번호(index)를 URL에 사용하였습니당 */}
-                   {/* 즉 board는 각각 5개의 게시판으로 나뉘고 boardID에 정의된 수에 따라
-                    게시판별로 분류 후 각각 타이틀의 링크를 게시판변로 분류된 index 순서대로
-                    링크를 부여.. 제가 설명해도 이게 무슨말인지 모르겠네
-                    코드를 보시는게 더 빠를겁니다! ㅎㅎ... 이렇게 링크 설정했어요~
-                   */}
-                  <Link to={`/board/${boardId}/${index + 1}`} state={{ post }}>
-                    {post.title}
-                  </Link>
+                <Link
+                  to={`/board/${post.boardId}/${post.id}`}
+                  state={{ post }}
+                >
+                  {post.title}
+                </Link>
                 </td>
                 <td className="td_writer">{post.writer}</td>
                 <td className="td_date">{post.created_at}</td>

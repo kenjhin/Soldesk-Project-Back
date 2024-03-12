@@ -189,6 +189,8 @@ body{
     flex-wrap: wrap;
     
     .messenger-group-header{
+      display: flex;
+      align-items: flex-end;
       width: 100%;
       height: 25px;
       background-color: #020e17;
@@ -197,10 +199,9 @@ body{
       cursor: pointer;
       margin-bottom: 2px;
       padding-left: 10px;
-      
-      span{
-        vertical-align: middle;
-      }
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
     .messenger-friend-list{
       display: flex;
@@ -236,11 +237,17 @@ body{
         .friend-id{
           flex-basis: 100%;
           color: #d3c495;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
         }
         .friend-profile-message{
           flex-basis: 100%;
           color: #d3c39580;
           font-size: 14px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
         }
       }
       

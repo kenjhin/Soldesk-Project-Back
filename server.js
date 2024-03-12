@@ -172,7 +172,7 @@ app.get('/userData', (req, res) => {
     const username = req.session.username;
 
     // MySQL에서 사용자 정보 조회 쿼리 실행
-    connection.query('SELECT id, username,password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
+    connection.query('SELECT id, username, password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('DB 조회 오류:', error);
         return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });

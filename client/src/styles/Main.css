@@ -20,6 +20,7 @@ td{
     text-align: center;
     width: 100px;
     height: 30px;
+    word-break: break-all;
     border-bottom: 1px rgba(255,255,255, 0.1) solid;
     a{
         &:link{
@@ -55,6 +56,10 @@ td{
     width: 500px;
 }.td_title{
     text-align: left;
+    max-width: 500px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 .mainBody{
     background-color: #1E1E20;
@@ -106,6 +111,7 @@ td{
         .post-title{
             flex-basis: 100%;
             color: white;
+            word-break: break-all;
         }
         .post-writer{
             flex-basis: 100%;
@@ -130,6 +136,7 @@ td{
             font-size: 20px;
             font-weight: lighter;
             flex-basis: 100%;    
+            word-break: break-all;
         }
     }
     .post-footer{
@@ -165,6 +172,7 @@ td{
         margin: 0px;
         margin-bottom: 5px;
         margin-left: 5px;
+        word-break: break-all;
     }
     textarea{
         flex-basis: 100%;

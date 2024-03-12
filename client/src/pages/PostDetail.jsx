@@ -19,6 +19,7 @@ const PostDetail = () => {
     textarea.current.style.height = textarea.current.scrollHeight + 'px';
   };
 
+
   // 댓글 등록 처리 함수
   const handleCommentSubmit = () => {
     // TODO: 댓글 등록 로직 구현
@@ -124,6 +125,7 @@ const handleDelete = async () => {
     }
   }
 };
+
 
 
 

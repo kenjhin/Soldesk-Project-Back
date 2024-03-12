@@ -14,6 +14,7 @@ import Main from "./Main";
 import IconSetModal from '../components/modals/IconSetModal';
 import MyInfoModal from '../components/modals/MyInfoModal';
 import Messenger from "../components/Messenger";
+import EditableText from "../components/EditableText";
 
 function Home({setLogined}) {
 
@@ -86,16 +87,20 @@ function Home({setLogined}) {
           </div>
         </div>
         <div className="headerProfileBox">
-          {/* hamster에 현재 로그인한 계정의 아이콘 받아오기 */}
           {userData && (
-    <IconSetModal
-      img={<img className="userIcon" src={userData.icon || hamsterIcon} alt="" />}
-    />
-  )}
-  {userData && (
+            <IconSetModal
+              img={<img className="userIcon" src={userData.icon || hamsterIcon} alt="" />}
+            />
+          )}
+          {userData && (
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>
-            <p className="profileMessage">"{userData.profileMessage}"</p>
+            <EditableText
+              text={userData.profileMessage}
+              onSave={(newMessage) => {
+                setUserData({...userData, profileMessage: newMessage});
+              }}
+            />
           </div>
           )}
           <button className="logoutBtn" onClick={handleLogout}>
