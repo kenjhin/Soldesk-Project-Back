@@ -80,7 +80,7 @@ app.post('/signup', (req, res) => {
 
     // MySQL 회원가입 쿼리
   const query = `
-  INSERT INTO user (username, password, nickname, address, authority, icon)
+  INSERT INTO user (username, password, nickname, address, authority, current_icon)
   VALUES (?, ?, ?, ?, ?, ?)
 `;
 
@@ -300,6 +300,23 @@ app.delete('/api/posts/:id', (req, res) => {
 
 
 
+
+
+// 채팅 DB로 보내기
+app.post('/chat/send', (req, res) => {
+  const { senderId, receiverId, content } = req.body;
+
+  // 채팅 Insert Query
+  const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
+  connection.query(insertQuery, [senderId, receiverId, content], (insertError, insertResults) => {
+    if (insertError) {
+      console.error('Insert chat error:', insertError);
+      return res.status(500).json({ message: 'Insert chat error' });
+    }
+
+    res.status(201).json({ message: 'Chat created successfully' });
+  });
+});
 
 
 
