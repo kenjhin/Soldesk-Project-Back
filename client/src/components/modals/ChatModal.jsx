@@ -5,7 +5,7 @@ import defaultIcon from "../../assets/img/hamster.jpg"
 import axios from 'axios';
 const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, currentChat, setCurrentChat}) => {
   const scrollRef = useRef();
-
+  const prevScrollHeight = useRef();
   // senderId나 receiverId가 내 아이디인 모든 채팅들이 시간별로 정리된 것
   
 
@@ -44,13 +44,19 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
   useEffect(() => {
     // 현재 채팅 목록에서 receiver_id 또는 senderId가 chatTarget과 일치하는 경우에만 스크롤 조절
     const shouldAdjustScroll = myChat.some(data => data.receiver_id === chatTarget || data.sender_id === chatTarget);
-
     if (shouldAdjustScroll) {
-      // 스크롤 아래로 이동
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // 현재 스크롤 높이
+      const currentScrollHeight = scrollRef.current.scrollHeight;
+      // 이전 스크롤 높이와 현재 스크롤 높이 비교
+      if (prevScrollHeight.current !== currentScrollHeight) {
+        // 스크롤 아래로 이동
+        scrollRef.current.scrollTop = currentScrollHeight;
+        // 이전 스크롤 높이 업데이트
+        prevScrollHeight.current = currentScrollHeight;
+      }
     }
 
-  }, [chatTarget]);
+  }, [myChat, chatTarget]);
   
 // 1. senderId가 내 아이디인 채팅을 DB에서 싹 가져온다.
 // 2. receiverId가 내 아이디인 채팅을 싹 가져온다.
