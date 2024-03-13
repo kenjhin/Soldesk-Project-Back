@@ -5,6 +5,7 @@ import getCurrentDateTime from '../components/function/getCurrentDateTime';
 import { useUser } from '../contexts/UserContext'; // 사용자 정보를 가져오는 컨텍스트
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import formatDate from '../components/function/formatDate';
 
 
 const PostDetail = () => {
@@ -65,15 +66,15 @@ const PostDetail = () => {
 // 2) 수정된 게시글 내용을 서버로 전송하는 로직    
     const handleEditSave = async () => {
       
-      try {
-        await axios.put(`http://localhost:3001/api/posts/${post?.post_id}`, {
-          title: editedTitle,
-          content: editedContent,
-        });
-        alert('게시글이 수정되었습니다.');
-        setIsEditing(false); // 수정 모드 비활성화
-        navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
-      } catch (error) {
+    try {
+      await axios.put(`http://localhost:3001/api/posts/${post?.post_id}`, {
+        title: editedTitle,
+        content: editedContent,
+      });
+      alert('게시글이 수정되었습니다.');
+      setIsEditing(false); // 수정 모드 비활성화
+      navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
+    } catch (error) {
         console.error('게시글 수정 중 오류 발생:', error);
         alert('게시글 수정에 실패했습니다.');
       }
@@ -126,21 +127,15 @@ const handleDelete = async () => {
   }
 };
 
-
-
-
-
-
-
-
-
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
     <div className='postBox'>
       <div className='post-header'>
         <h2 className='post-title'>{post?.title}</h2>
         <p className='post-writer'>{post?.writer}</p>
-        <p className='post-date'>{post?.date}</p>
+        <p className='post-date'>{formatDate(post.created_at, 'post')}</p>
         <p className='post-views'>조회 {post?.views}</p>
       </div>
       <div className='post-body'>
@@ -160,16 +155,19 @@ const handleDelete = async () => {
             <div className='comment-textarea-container'>
               <textarea ref={textarea} onInput={handleResizeHeight} placeholder='댓글을 남겨보세요.' />
               <div className='btnBox'>
-                {userData && userData.nickname === post?.writer && (<>
-                <button onClick={handleEdit}>수정</button>
-                <button onClick={handleDelete}>삭제</button></>)}
-                <button onClick={handleCommentSubmit}>등록</button>
+                <button className='board-btn' onClick={handleCommentSubmit}>등록</button>
               </div>
             </div>
           </div>
         </div>
+        <div className='footer-btn-container'>
+          {userData && userData.nickname === post?.writer && (<>
+          <button className='board-btn' onClick={handleEdit}>수정</button>
+          <button className='board-btn' onClick={handleDelete}>삭제</button></>)}
+        </div>
       </div>
     </div>
+    
   );
 };
 

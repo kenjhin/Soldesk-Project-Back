@@ -191,14 +191,20 @@ td{
         flex-basis: 100%;
         display: flex;
         justify-content: flex-end;
-        button{
-            border: white solid 1px;
-            background: none;
-            color: white;
-        }
     }
 }
-
+.footer-btn-container{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.board-btn{
+    border: white solid 1px;
+    background: none;
+    color: white;
+    &:hover{
+        background: linear-gradient(180deg,rgba(255,255,255,0) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+    }
+}
 
 /* Post.css */
 .writeBox {
