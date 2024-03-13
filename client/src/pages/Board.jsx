@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/App.css';
 import '../styles/Main.css';
-
+import formatDate from '../components/function/formatDate';
 const Board = () => {
 
   const location = useLocation();
@@ -43,50 +43,46 @@ const Board = () => {
         <h2 style={{ color: "white", marginTop: "20px", marginBottom: "20px", fontSize: "32px", fontWeight: 'bold' }}>
           {boardNames[boardId - 1]}
         </h2>
-        {data.length > 0 ? (
-          <table className="boardTable">
-            <thead>
-              <tr>
-                <th className="th_id">번호</th>
-                <th className="th_title">제목</th>
-                <th className="th_writer">작성자</th>
-                <th className="th_date">작성일</th>
-                <th className="th_views">조회수</th>
-                <th className="th_like">추천</th>
-              </tr>
-            </thead>
-            <tbody> 
-            {currentPosts.map((post, index) => (
-              <tr key={index}>
-                {/* 게시글 번호를 순서대로 표시 */}
-                <td className="td_id">{index + 1}</td> 
-                <td className="td_title">
-                <Link
-                  to={`/board/${post.boardId}/${post.id}`}
-                  state={{ post }}
-                >
-                  {post.title}
-                </Link>
-                </td>
-                <td className="td_writer">{post.writer}</td>
-                <td className="td_date">{post.created_at}</td>
-                <td className="td_views">{post.views}</td>
-                <td className="td_like">{post.likes}</td>
-              </tr>
-            ))}
+        <table className="boardTable">
+          <thead>
+            <tr>
+              <th className="th_id">번호</th>
+              <th className="th_title">제목</th>
+              <th className="th_writer">작성자</th>
+              <th className="th_date">작성일</th>
+              <th className="th_views">조회수</th>
+              <th className="th_like">추천</th>
+            </tr>
+          </thead>
+          <tbody> 
+          {currentPosts.map((post, index) => (
+            <tr key={index}>
+              {/* 게시글 번호를 순서대로 표시 */}
+              <td className="td_id">{index + 1}</td> 
+              <td className="td_title">
+              <Link
+                to={`/board/${post.boardId}/${post.id}`}
+                state={{ post }}
+              >
+                {post.title}
+              </Link>
+              </td>
+              <td className="td_writer">{post.writer}</td>
+              <td className="td_date">{formatDate(post.created_at, 'postList')}</td>
+              <td className="td_views">{post.views}</td>
+              <td className="td_like">{post.likes}</td>
+            </tr>
+          ))}
           </tbody>
-          </table>
-        ) : (
-          <p >게시글이 없습니다.</p>
-        )}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        </table>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: '10px'}}>
           <Link to={`/board/${boardId}/post`} state={{ boardId }}>
-            <button style={{ marginTop: '10px', border: 'none', color: 'white' }}>글쓰기</button>
+            <button className='board-btn'>글쓰기</button>
           </Link>
         </div>
         <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
           {Array.from({ length: totalPages }, (_, index) => (
-            <button key={index + 1} onClick={() => paginate(index + 1)} style={{ margin: "0 5px" }}>
+            <button key={index + 1} onClick={() => paginate(index + 1)} style={{ margin: "0 5px", border: 'white solid 1px', background: 'none', color: 'white' }}>
               {index + 1}
             </button>
           ))}

@@ -16,6 +16,8 @@ function EditableText({ text, onSave }) {
     }
   };
 
+  
+
   return (
     <div className="editableText-container">
       {isEditing ? (
@@ -31,7 +33,7 @@ function EditableText({ text, onSave }) {
           autoFocus
         />
       ) : (
-        <p className="editableText-p" onDoubleClick={handleDoubleClick}>"{text ? text:'상태메시지'}"</p>
+        <p className="editableText-p" onDoubleClick={handleDoubleClick}>"{text}"</p>
       )}
     </div>
   );

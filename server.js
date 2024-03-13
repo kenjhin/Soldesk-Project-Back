@@ -16,8 +16,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
@@ -99,7 +99,6 @@ app.post('/signup', (req, res) => {
       // 회원가입 성공 시 세션 설정
       req.session.isLoggedIn = true;
       req.session.username = username;
-
       return res.status(201).json({ success: true });
     }
   );
@@ -172,7 +171,7 @@ app.get('/userData', (req, res) => {
     const username = req.session.username;
 
     // MySQL에서 사용자 정보 조회 쿼리 실행
-    connection.query('SELECT id, username, password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
+    connection.query('SELECT id, username, password, nickname, address, profile_message FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('DB 조회 오류:', error);
         return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });
@@ -192,12 +191,62 @@ app.get('/userData', (req, res) => {
   }
 });
 
+app.get('/userFriends', (req, res) => {
+  const username = req.session.username;
+
+  // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
+  const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
+  connection.query(selectQuery, [username], (error, results) => {
+    if (error) {
+      console.error('DB 조회 오류:', error);
+      return res.status(500).json({ success: false, error: 'user_friends를 조회할 수 없습니다.' });
+    }
+
+    // 친구 목록의 프로필 메시지 조회
+    const friendIds = results.map(result => result.friend_id);
+    const profileQuery = 'SELECT username, nickname, profile_message FROM user WHERE username IN (?)';
+    connection.query(profileQuery, [friendIds], (error, profileResults) => {
+      if (error) {
+        console.error('프로필 조회 오류:', error);
+        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
+      }
+
+      // 프로필 메시지를 결과에 추가
+      for (const result of results) {
+        const profile = profileResults.find(profile => profile.username === result.friend_id);
+        if (profile) {
+          result.profile_message = profile.profile_message;
+          result.nickname = profile.nickname;
+        }
+      }
+
+      // 최종 결과 반환
+      res.json(results);
+    });
+  });
+});
+
+app.put('/profileMessage', (req, res) => {
+  const { profileMessage, username } = req.body;
+
+  const updateQuery = 'UPDATE user SET profile_message = ? WHERE username = ?';
+  connection.query(updateQuery, [profileMessage, username], (updateError, results) => {
+    if (updateError) {
+      console.error('Update profileMessage error:', updateError);
+      return res.status(500).json({ message: 'Update profileMessage error' });
+    }
+
+    // 최종 결과 반환
+    res.json(results);
+  });
+});
+
 
 // 게시물 작성 POST
 app.post('/api/posts', (req, res) => {
   const { title, content, boardId, writerId } = req.body;
 
-  const userQuery = 'SELECT nickname FROM user WHERE id = ?';
+  const userQuery = 'SELECT nickname FROM user WHERE username = ?';
   connection.query(userQuery, [writerId], (error, results) => {
     if (error || results.length === 0) {
       console.error('User fetch error:', error);
@@ -206,7 +255,7 @@ app.post('/api/posts', (req, res) => {
 
     const writerNickname = results[0].nickname;
 
-    const insertQuery = 'INSERT INTO board (title, content, user_id, board_id, writer, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+    const insertQuery = 'INSERT INTO post (title, content, user_id, board_id, writer) VALUES (?, ?, ?, ?, ?)';
     connection.query(insertQuery, [title, content, writerId, boardId, writerNickname], (insertError, insertResults) => {
       if (insertError) {
         console.error('Insert post error:', insertError);
@@ -222,9 +271,8 @@ app.post('/api/posts', (req, res) => {
 // 게시물 리스트 가져오기 GET
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
-
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT post_id, title, content, writer, created_at, views, likes FROM board WHERE board_id = ? ORDER BY created_at ASC';
+  const query = 'SELECT id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
@@ -242,7 +290,7 @@ app.put('/api/posts/:id', (req, res) => {
   const { title, content } = req.body; // 요청 본문에서 제목과 내용 추출
 
   // 게시물이 존재하는지 확인하는 쿼리
-  const checkQuery = 'SELECT * FROM board WHERE post_id = ?';
+  const checkQuery = 'SELECT * FROM post WHERE id = ?';
   connection.query(checkQuery, [id], (checkError, checkResults) => {
     if (checkError) {
       console.error('게시물-DB 체크 오류:', checkError);
@@ -254,7 +302,7 @@ app.put('/api/posts/:id', (req, res) => {
     }
 
     // 게시물 업데이트 쿼리
-    const updateQuery = 'UPDATE board SET title = ?, content = ? WHERE post_id = ?';
+    const updateQuery = 'UPDATE post SET title = ?, content = ? WHERE id = ?';
     connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
       if (updateError) {
         console.error('게시물 수정 에러:', updateError);
@@ -280,7 +328,7 @@ app.put('/api/posts/:id', (req, res) => {
 app.delete('/api/posts/:id', (req, res) => {
   const { id } = req.params; // URL에서 게시물 ID 추출
 
-  const deleteQuery = 'DELETE FROM board WHERE post_id = ?';
+  const deleteQuery = 'DELETE FROM post WHERE id = ?';
   connection.query(deleteQuery, [id], (deleteError, deleteResults) => {
     if (deleteError) {
       console.error('게시물 삭제 에러:', deleteError);
@@ -296,25 +344,43 @@ app.delete('/api/posts/:id', (req, res) => {
 });
 
 
+// 채팅 가져오기 GET
+app.get('/chatData', (req, res) => {
+  const username = req.session.username;
 
+  const selectQuery = `SELECT created_at, sender_id, receiver_id, content FROM chat WHERE sender_id = ? or receiver_id = ?`;
+  connection.query(selectQuery, [username, username], (error, results) => {
+  if (error) {
+    console.error('Fetch posts error:', error);
+    return res.status(500).json({ message: 'Error fetching posts' });
+  }
 
-
-
-
+    res.json(results);
+  });
+});
 
 // 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
-
-  // 채팅 Insert Query
-  const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
-  connection.query(insertQuery, [senderId, receiverId, content], (insertError, insertResults) => {
-    if (insertError) {
-      console.error('Insert chat error:', insertError);
-      return res.status(500).json({ message: 'Insert chat error' });
+  console.log([senderId, receiverId, content])
+  const userQuery = 'SELECT username FROM user WHERE username = ?';
+  connection.query(userQuery, [receiverId], (error, results) => {
+    if (error || results.length === 0) {
+      console.error('User fetch error:', error);
+      return res.status(500).json({ message: 'User fetch error' });
     }
+    console.log(`chat send : ${results}`);
 
-    res.status(201).json({ message: 'Chat created successfully' });
+    // 채팅 Insert Query
+    const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
+    connection.query(insertQuery, [senderId, receiverId, content], (insertError, insertResults) => {
+      if (insertError) {
+        console.error('Insert chat error:', insertError);
+        return res.status(500).json({ message: 'Insert chat error' });
+      }
+      
+      res.status(201).json({ message: 'Chat created successfully' });
+    });
   });
 });
 
