@@ -8,6 +8,7 @@ import PostDetail from './PostDetail';
 import Post from './Post';
 import Slider from 'react-slick';
 import SimpleSlider from '../components/SimpleSlider';
+import Store from './Store';
 
 const Main = () => {
   const [posts, setPosts] = useState();
@@ -52,7 +53,8 @@ const Main = () => {
         />
         <Route path={`/board/:boardId/*`} element={<Board/>}/>
         <Route path={`/board/:boardId/:postId`} element={<PostDetail/>}/>
-        <Route path={`/board/:boardId/post`} element={<Post/>}/> 
+        <Route path={`/board/:boardId/post`} element={<Post/>}/>
+        <Route path={`/Store`} element={<Store/>}/>
       </Routes>
     </div>
   );

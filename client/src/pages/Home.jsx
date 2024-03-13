@@ -81,9 +81,11 @@ function Home({setLogined}) {
             <button className="inventoryBtn mouseover">
               <img src={inventoryIco} alt="" />
             </button>
+            <Link to="/store">
             <button className="storeBtn mouseover">
-              <img src={storeIco} alt="" />
-            </button>
+              <img src={storeIco} alt="/store" />
+            </button>     
+            </Link>
           </div>
         </div>
         <div className="headerProfileBox">

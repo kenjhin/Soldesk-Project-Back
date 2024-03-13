@@ -10,8 +10,6 @@ import hamster from "./assets/img/hamster.jpg";
 // pages
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import Board from "./pages/Board";
-
 
 // components
 
