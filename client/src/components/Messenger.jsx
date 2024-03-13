@@ -8,8 +8,10 @@ import defaultIcon from "../assets/img/hamster.jpg"
 import ChatModal from './modals/ChatModal';
 import getCurrentDateTime from './function/getCurrentDateTime';
 import AddFriendModal from './modals/AddFriendModal';
+
 import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
+import { useIcon } from '../contexts/IconContext';
 
 const Messenger = () => {
   const [modalShow, setModalShow] = useState(false);
@@ -17,8 +19,9 @@ const Messenger = () => {
   const [myChat, setMyChat] = useState([]);
   const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
   const [userFriends, setUserFriends] = useState([]);
-
+  const { icons, setIcons } = useIcon();
   const [chatTarget, setChatTarget] = useState();
+  const [targetInfo, setTargetInfo] = useState([]);
   const [currentChat, setCurrentChat] = useState({
     senderId: '',
     receiverId: '',
@@ -35,8 +38,9 @@ const Messenger = () => {
     }
   };
   
-  const openChatModal = (friendName) => {
-    setChatTarget(friendName);
+  const openChatModal = (friendInfo) => {
+    setChatTarget(friendInfo.nickname);
+    setTargetInfo(friendInfo);
     setModalShow(true);
   };
 
@@ -144,9 +148,9 @@ const Messenger = () => {
             userFriends
               .filter((data) => data.group_name === group)
               .map((friends, j) => (
-                <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends.nickname)}>
+                <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-                    <img src={defaultIcon} alt='friend-icon' />
+                    <img src={icons[friends.current_icon]} alt='friend-icon' />
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>
@@ -173,6 +177,8 @@ const Messenger = () => {
             setChatTarget={setChatTarget}
             currentChat={currentChat}
             setCurrentChat={setCurrentChat}
+            targetInfo={targetInfo}
+            icons={icons}
           />
         )}
         <button className='chatBtn' onClick={()=>{setModalShow((e) => !e)}}/>

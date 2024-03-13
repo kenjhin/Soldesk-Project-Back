@@ -526,15 +526,21 @@ body{
     font-weight: bold;
   }
 }.iconSelectArea{
-  border: #463714 solid 1px;
+  outline: #463714 solid 1px;
   height: 480px;
-  width: 710px;
+  width: 670px;
+  padding: 5px;
+}.icon-container{
   display: flex;
   flex-wrap: wrap;
+  height: auto;
 }.iconsBox{
-  padding: 10px;
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  
   img{
-    flex-basis: 100px;
+    width: 100px;
     height: 100px;
     border: #7c6224 solid 3px;
     object-fit: cover;    /* 이미지 비율 유지 */
