@@ -107,8 +107,6 @@ function SignUpModal({show, onHide}) {
       });
 
     // 초기화 및 종료.
-    
-    alert('회원가입 완료');
     onHide();
     setSignUpInfo(defaultInfo);
   };

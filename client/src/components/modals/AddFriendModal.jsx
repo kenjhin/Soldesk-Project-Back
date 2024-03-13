@@ -12,8 +12,6 @@ const AddFriendModal = ({ show, onClose, onAddFriend }) => {
     if (onAddFriend) {
       onAddFriend();
     }
-
-    onClose();
   };
 
   return (

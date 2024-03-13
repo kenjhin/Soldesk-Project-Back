@@ -32,11 +32,10 @@ const Post = () => {
   
     try {
       await axios.post(`http://localhost:3001/api/posts`, {
-        // 
         title,
         content,
         boardId,
-        writerId: userData.id, // writer 대신 writerId를 사용하여 현재 로그인한 사용자의 ID 전송
+        writerId: userData.username, // writer 대신 writerId를 사용하여 현재 로그인한 사용자의 ID 전송
       });
   
       alert('게시글이 작성되었습니다.');
@@ -45,8 +44,8 @@ const Post = () => {
     } catch (error) {
       console.error('게시글 작성 중 오류 발생:', error);
       alert('게시글 작성에 실패했습니다.');
-    }
-  };
+  }
+};
 
   return (
     <div className='writeBox'>

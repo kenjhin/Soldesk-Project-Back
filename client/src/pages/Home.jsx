@@ -55,7 +55,17 @@ function Home({setLogined}) {
       console.error('로그아웃 요청 실패:', error);
     }
   };
-
+  
+  const handleEditSave = async (text) => {
+    try {
+      await axios.put(`http://localhost:3001/profileMessage`, {
+        profileMessage: text,
+        username: userData.username
+      });
+    } catch (error) {
+      console.error('상태메시지 수정 중 오류 발생:', error);
+    }
+  };
 
   return (
     <div className="homeBody">
@@ -98,15 +108,17 @@ function Home({setLogined}) {
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>
             <EditableText
-              text={userData.profileMessage}
+              text={userData.profile_message}
               onSave={(newMessage) => {
-                setUserData({...userData, profileMessage: newMessage});
+                handleEditSave(newMessage);
+                setUserData({...userData, profile_message: newMessage});
+                console.log('aa');
               }}
             />
           </div>
           )}
           <button className="logoutBtn" onClick={handleLogout}>
-            logout
+            로그아웃
           </button>
         </div>
       </header>
