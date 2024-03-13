@@ -1,13 +1,11 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from 'react'
-import getCurrentDateTime from '../function/getCurrentDateTime';
-import defaultIcon from "../../assets/img/hamster.jpg"
 import axios from 'axios';
-const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, currentChat, setCurrentChat}) => {
+
+const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, 
+                    currentChat, setCurrentChat, targetInfo, icons}) => {
   const scrollRef = useRef();
   const prevScrollHeight = useRef();
-  // senderId나 receiverId가 내 아이디인 모든 채팅들이 시간별로 정리된 것
-  
 
   useEffect(() => {
     // 채팅 스크롤 아래에서 시작
@@ -73,7 +71,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
       </div>
   )}
 
-  // 게시글 Post 요청
+  // 채팅 post 요청
   const handleChatSend = async () => {
     if (!userData) {
         alert('로그인 세션이 만료되었습니다.');
@@ -117,7 +115,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
               <div key={i} className='chat-list' onClick={() => { setChatTarget(friendId) }}>
               <div className='chat-friend-icon'>
                 {/* chat.senderId와 chat.receiver_id 중에 내 id와 다른 id의 아이콘 출력 */}
-                <img src={defaultIcon} alt='' />
+                <img src={icons[targetInfo.current_icon]} alt='' />
               </div>
               <div className='chat-info'>
                 <span className='chat-friend-nickname'>
@@ -139,7 +137,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
               <div className='chat-friend'>
                 <div className='chat-friend-icon'>
                   {/* chat.senderId와 chat.receiverId중에 내 id와 다른 것의 아이콘 출력 */}
-                  <img src={defaultIcon} alt=''/>
+                  <img src={icons[targetInfo.current_icon]} alt=''/>
                 </div>
                 <span className='chat-friend-nickname'>
                   {/* chat.senderId와 chat.receiverId중에 내 id와 다른 것 출력 */}

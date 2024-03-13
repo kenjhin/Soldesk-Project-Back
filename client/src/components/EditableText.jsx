@@ -7,6 +7,7 @@ function EditableText({ text, onSave }) {
 
   const handleDoubleClick = () => {
     setIsEditing(true);
+    setEditedText(text);
   };
 
   const handleKeyDown = (e) => {

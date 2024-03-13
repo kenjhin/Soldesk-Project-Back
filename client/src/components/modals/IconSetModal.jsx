@@ -2,30 +2,20 @@
 import React, {useState, useRef, useEffect} from 'react'
 import hamster from "../../assets/img/hamster.jpg"
 import "../../styles/IconSetModal.css";
+import { useIcon } from '../../contexts/IconContext';
+import Icons from '../Icons';
+import { useUser } from '../../contexts/UserContext';
 
 const IconSetModal = ({img, content}) => {
   const [modalOpen, setModalOpen] = useState(false);
   const modalBackground = useRef();
-  const [userData, setUserData] = useState({
-    logined: true,
-    icon: hamster,
-    icons: [hamster, hamster],
-    nickname: '유저닉네임',
-    profileMessage: '상태메시지',
-    status: undefined,
-    username: 'ID',
-    password: 'password',
-    confirmPassword: 'password',
-    address: {
-      zonecode: 'zonecode',
-      fullAddress: 'fullAddress',
-      detailAddress: 'detailAddress'
-    }
-  });
+  const { icons, setIcons } = useIcon();
+  const { userData, setUserData } = useUser();
+  // const { icons, setIcons } = useIcon();
 
   useEffect(()=>{
     // DB데이터 받아오기
-    // setUserData(DB);
+
   }, []);
 
   return (
@@ -52,7 +42,7 @@ const IconSetModal = ({img, content}) => {
             {
               <div className="iconModal">
                 <div className="iconModalLeftBox">
-                  <img src={userData.icon} alt="" />
+                  <img src={icons[userData.current_icon]} alt="" />
                   <p>{userData.nickname}</p>
                 </div>
                 <div className="iconModalRightBox">
@@ -60,14 +50,9 @@ const IconSetModal = ({img, content}) => {
                     <p>아이콘 설정</p>
                   </div>
                   <div className="iconSelectArea">
-                    {userData.icons.map(function (a, i) {
-                      return (
-                        <div key={i} className="iconsBox">
-                          {/* 눌렀을 때 icon=icons[i]로 바꾸기 */}
-                          <img src={userData.icons[i]} alt="" />
-                        </div>
-                      );
-                    })}
+                    <div className="icon-container">
+                      <Icons show={true}/>
+                    </div>
                   </div>
                 </div>
               </div>
