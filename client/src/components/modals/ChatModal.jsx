@@ -16,6 +16,11 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
     // 현재 스크롤 위치 = 현재 스크롤 길이
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
 
+    // 친구리스트에서 친구 눌러서 채팅창 열었으면 해당 친구와의 채팅창 띄우기
+    if(chatTarget){
+      return;
+    }
+
     // 가장 최근에 채팅한 사람 첫타겟으로 잡기
     // 최근 채팅한 상대방 내림차순으로
     const recentChat = myChat.reduce((recent, chat) => {

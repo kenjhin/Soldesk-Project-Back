@@ -78,16 +78,18 @@ app.post('/signup', (req, res) => {
     return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
   }
 
-  // MySQL 회원가입 쿼리
+    // MySQL 회원가입 쿼리
   const query = `
   INSERT INTO user (username, password, nickname, address, authority, icon)
   VALUES (?, ?, ?, ?, ?, ?)
 `;
 
   // MySQL 쿼리 실행, addressString을 쿼리 파라미터로 전달
+
   connection.query(query, 
     [username, password, nickname, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
     (error, results) => {
+
 
       if (error) {
         console.error('DB확인 요망 post요청 회원가입 기능오류:', error);
@@ -170,7 +172,7 @@ app.get('/userData', (req, res) => {
     const username = req.session.username;
 
     // MySQL에서 사용자 정보 조회 쿼리 실행
-    connection.query('SELECT username,password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
+    connection.query('SELECT id, username,password, nickname, address FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('DB 조회 오류:', error);
         return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });
@@ -191,6 +193,43 @@ app.get('/userData', (req, res) => {
 });
 
 
+// 게시물 작성 POST 
+app.post('/api/posts', (req, res) => {
+  const { title, content, boardId, writerId } = req.body;
+
+  // writerId를 사용하여 user 테이블에서 nickname 조회
+  const userQuery = 'SELECT nickname FROM user WHERE id = ?';
+  connection.query(userQuery, [writerId], (error, results) => {
+    if (error || results.length === 0) {
+      console.error('User fetch error:', error);
+      return res.status(500).json({ message: 'User fetch error' });
+    }
+
+    const writerNickname = results[0].nickname;
+
+    // 게시글 정보를 board 테이블에 저장하는 쿼리
+    const insertQuery = 'INSERT INTO board (title, content, user_id, writer, created_at) VALUES (?, ?, ?, ?, NOW())';
+    connection.query(insertQuery, [title, content, writerId, writerNickname], (insertError, insertResults) => {
+      if (insertError) {
+        console.error('Insert post error:', insertError);
+        return res.status(500).json({ message: 'Insert post error' });
+      }
+
+      res.status(201).json({ message: 'Post created successfully' });
+    });
+  });
+});
+
+app.get('/api/posts/likes', (req, res) => {
+  const query = 'SELECT * FROM post ORDER BY likes DESC';
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('게시글 가져오기 실패:', error);
+      return res.status(500).json({ message: '서버 오류로 게시글을 가져올 수 없습니다.' });
+    }
+    res.status(200).json(results);
+  });
+});
 
 
 

@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { useState } from 'react';
 
-function TextInput({ type = 'text', label, onInputChange}) {
+function TextInput({type = 'text', label, onInputChange, onKeyDown}) {
   const [value, setValue] = useState('');
 
   function handleChange(e) {
@@ -15,7 +15,7 @@ function TextInput({ type = 'text', label, onInputChange}) {
 
   return (
     <div className="input-container">
-      <input type={type} value={value} onChange={handleChange} spellCheck="false"/>
+      <input type={type} value={value} onChange={handleChange} spellCheck="false" onKeyDown={onKeyDown}/>
       <label className={value && 'filled'}>
         {label}
       </label>

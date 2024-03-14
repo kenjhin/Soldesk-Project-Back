@@ -29,10 +29,9 @@ const Board = () => {
   const [currentPage, setCurrentPage] = useState(1);  // 현재 페이지: 1번 페이지
   const [postsPerPage] = useState(20);                // 페이지 당 포스트 수 : 20개
   
-  useEffect(() => {
-    // fetchData();
-  }, [currentPage], [data]);
-  
+  // useEffect(() => {
+  //   fetchData();
+  // }, [currentPage], [data]);
   // const fetchData = async () => {
   //   try {
   //     const response = await fetch('http://localhost:3001/board');
