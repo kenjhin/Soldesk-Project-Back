@@ -16,8 +16,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -192,35 +192,43 @@ app.get('/userData', (req, res) => {
 });
 
 app.get('/userFriends', (req, res) => {
+  if (!req.session.username) {
+    return res.status(401).json({ message: '로그인이 필요합니다.' });
+  }
+
   const username = req.session.username;
 
-  // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
+  // 유저 친구 정보 조회
   const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
-  connection.query(selectQuery, [username], (error, results) => {
+  connection.query(selectQuery, [username], (error, friendResults) => {
     if (error) {
       console.error('DB 조회 오류:', error);
-      return res.status(500).json({ success: false, error: 'user_friends를 조회할 수 없습니다.' });
+      return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
     }
 
-    // 친구 목록의 프로필 메시지 조회
-    const friendIds = results.map(result => result.friend_id);
+    if (friendResults.length === 0) {
+      return res.json([]);
+    }
+
+    // 친구 프로필 정보 조회
+    const friendIds = friendResults.map(friend => friend.friend_id);
     const profileQuery = 'SELECT username, nickname, profile_message FROM user WHERE username IN (?)';
-    connection.query(profileQuery, [friendIds], (error, profileResults) => {
-      if (error) {
-        console.error('프로필 조회 오류:', error);
-        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
+    connection.query(profileQuery, [friendIds], (profileError, profileResults) => {
+      if (profileError) {
+        console.error('프로필 조회 오류:', profileError);
+        return res.status(500).json({ message: '프로필을 조회할 수 없습니다.' });
       }
 
-      // 프로필 메시지를 결과에 추가
-      for (const result of results) {
-        const profile = profileResults.find(profile => profile.username === result.friend_id);
-        if (profile) {
-          result.profile_message = profile.profile_message;
-          result.nickname = profile.nickname;
-        }
-      }
+      // 결과 합치기
+      const results = friendResults.map(friend => {
+        const profile = profileResults.find(profile => profile.username === friend.friend_id);
+        return {
+          ...friend,
+          nickname: profile ? profile.nickname : null,
+          profile_message: profile ? profile.profile_message : null
+        };
+      });
 
-      // 최종 결과 반환
       res.json(results);
     });
   });
