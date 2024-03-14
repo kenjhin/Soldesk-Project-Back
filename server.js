@@ -171,7 +171,7 @@ app.get('/userData', (req, res) => {
     const username = req.session.username;
 
     // MySQL에서 사용자 정보 조회 쿼리 실행
-    connection.query('SELECT id, username, password, nickname, address, profile_message FROM user WHERE username = ?', [username], (error, results) => {
+    connection.query('SELECT * FROM user WHERE username = ?', [username], (error, results) => {
       if (error) {
         console.error('DB 조회 오류:', error);
         return res.status(500).json({ success: false, error: '서버 오류로 유저 데이터를 조회할 수 없습니다.' });
@@ -206,6 +206,7 @@ app.get('/userFriends', (req, res) => {
       return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
     }
 
+<<<<<<< HEAD
     if (friendResults.length === 0) {
       return res.json([]);
     }
@@ -228,6 +229,26 @@ app.get('/userFriends', (req, res) => {
           profile_message: profile ? profile.profile_message : null
         };
       });
+=======
+    // 친구 목록의 프로필 메시지 조회
+    const friendIds = results.map(result => result.friend_id);
+    const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
+    connection.query(profileQuery, [friendIds], (error, profileResults) => {
+      if (error) {
+        console.error('프로필 조회 오류:', error);
+        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
+      }
+
+      // 프로필 메시지를 결과에 추가
+      for (const result of results) {
+        const profile = profileResults.find(profile => profile.username === result.friend_id);
+        if (profile) {
+          result.profile_message = profile.profile_message;
+          result.nickname = profile.nickname;
+          result.current_icon = profile.current_icon;
+        }
+      }
+>>>>>>> 2c05350c35a57846f9c50121f9db1759b697b2d2
 
       res.json(results);
     });
@@ -370,14 +391,15 @@ app.get('/chatData', (req, res) => {
 // 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
-  console.log([senderId, receiverId, content])
+  // console.log([senderId, receiverId, content])
+
   const userQuery = 'SELECT username FROM user WHERE username = ?';
   connection.query(userQuery, [receiverId], (error, results) => {
     if (error || results.length === 0) {
       console.error('User fetch error:', error);
       return res.status(500).json({ message: 'User fetch error' });
     }
-    console.log(`chat send : ${results}`);
+    // console.log(`chat send : ${results}`);
 
     // 채팅 Insert Query
     const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
@@ -392,6 +414,22 @@ app.post('/chat/send', (req, res) => {
   });
 });
 
+// 아이콘 Update
+app.put('/icon/set', (req, res) => {
+  const { currentIcon, username } = req.body;
+  console.log([currentIcon, username]);
+
+  const updateQuery = 'UPDATE user SET current_icon = ? WHERE username = ?';
+  connection.query(updateQuery, [currentIcon, username], (updateError, results) => {
+    if (updateError) {
+      console.error('Update currentIcon error:', updateError);
+      return res.status(500).json({ message: 'Update currentIcon error' });
+    }
+
+    // 최종 결과 반환
+    res.json(results);
+  });
+});
 
 
 // <초기세팅> 서버실행 및 서버 종료(엔드포인트 코드이므로 항상 맨 마지막에 배치하기.)
