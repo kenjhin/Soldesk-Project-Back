@@ -10,12 +10,21 @@ import Slider from 'react-slick';
 import SimpleSlider from '../components/SimpleSlider';
 
 const Main = () => {
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    // DB 게시글 파일들 받아오기dddd
-    setPosts();
-  }, []); // 처음 화면 떴을 때 실행
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/posts/likes');
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error('게시글 가져오기 실패:', error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <div className="mainBody">
@@ -36,16 +45,12 @@ const Main = () => {
                 <SimpleSlider/>
               </div>
               <div className="hotPostBox" style={{ color: "white" }}>
-                <div className='host-post'>
-                  <p>좋아요 1등글</p>
-                  <p>대충 맨 위 제목 그 아래 내용</p>
-                </div>
-                <div className='host-post'>
-                  <p>좋아요 2등글</p>
-                </div>
-                <div className='host-post'>
-                  <p>좋아요 3등글</p>
-                </div>
+                {posts.slice(0, 3).map((post, index) => ( 
+                  <div key={post.id} className='host-post'>
+                    <p>{`${index + 1}등글: ${post.title}`}</p>
+                    <p>{post.content}</p>
+                  </div>
+                ))}
               </div>
             </div>
           }
@@ -58,4 +63,4 @@ const Main = () => {
   );
 }
 
-export default Main
+export default Main;

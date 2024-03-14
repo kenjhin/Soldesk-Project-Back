@@ -15,9 +15,9 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const mysql      = require('mysql2');
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    host     : '211.52.60.107',
+    user     : 'ku',
+    password : '1234',
     database : 'soldesk'
   });
 
