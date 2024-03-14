@@ -9,6 +9,8 @@ import Post from './Post';
 import Slider from 'react-slick';
 import SimpleSlider from '../components/SimpleSlider';
 import Store from './Store';
+import IconStoreManager from './admin/IconStoreManager';
+
 
 const Main = () => {
   const [posts, setPosts] = useState();
@@ -55,6 +57,7 @@ const Main = () => {
         <Route path={`/board/:boardId/:postId`} element={<PostDetail/>}/>
         <Route path={`/board/:boardId/post`} element={<Post/>}/>
         <Route path={`/Store`} element={<Store/>}/>
+        <Route path={`//icon-store-manager`} element={<IconStoreManager/>}/>
       </Routes>
     </div>
   );

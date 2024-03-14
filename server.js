@@ -9,6 +9,17 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser'); 
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session); // 메모리에 세션 정보 저장을 위한 모듈 추가
+// (Icon 저장을 위한 서버사이드 스토리지)
+const multer = require('multer'); // 멀터 모듈을 불러옵니다.
+const path = require('path'); // path 모듈을 불러옵니다.
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // 이미지 파일이 저장될 서버 내 경로
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) // 파일 이름 설정
+  }
+});
 
 
   // [MYSQL-1] DB연결 초기설정
@@ -53,6 +64,9 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   // [EJS] 미들웨어
   app.set('view engine', 'ejs');
 
+// 아이콘 저장 스토리지
+const upload = multer({ storage: storage });
+app.use('/uploads', express.static('uploads'));
 
 
 
@@ -191,69 +205,46 @@ app.get('/userData', (req, res) => {
   }
 });
 
-app.get('/userFriends', (req, res) => {
-  if (!req.session.username) {
-    return res.status(401).json({ message: '로그인이 필요합니다.' });
-  }
 
-  const username = req.session.username;
-
-  // 유저 친구 정보 조회
-  const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
-  connection.query(selectQuery, [username], (error, friendResults) => {
-    if (error) {
-      console.error('DB 조회 오류:', error);
-      return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
+  app.get('/userFriends', (req, res) => {
+    if (!req.session.username) {
+      return res.status(401).json({ message: '로그인이 필요합니다.' });
     }
-
-<<<<<<< HEAD
-    if (friendResults.length === 0) {
-      return res.json([]);
-    }
-
-    // 친구 프로필 정보 조회
-    const friendIds = friendResults.map(friend => friend.friend_id);
-    const profileQuery = 'SELECT username, nickname, profile_message FROM user WHERE username IN (?)';
-    connection.query(profileQuery, [friendIds], (profileError, profileResults) => {
-      if (profileError) {
-        console.error('프로필 조회 오류:', profileError);
-        return res.status(500).json({ message: '프로필을 조회할 수 없습니다.' });
-      }
-
-      // 결과 합치기
-      const results = friendResults.map(friend => {
-        const profile = profileResults.find(profile => profile.username === friend.friend_id);
-        return {
-          ...friend,
-          nickname: profile ? profile.nickname : null,
-          profile_message: profile ? profile.profile_message : null
-        };
-      });
-=======
-    // 친구 목록의 프로필 메시지 조회
-    const friendIds = results.map(result => result.friend_id);
-    const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
-    connection.query(profileQuery, [friendIds], (error, profileResults) => {
+  
+    const username = req.session.username;
+  
+    // 유저 친구 정보 조회
+    const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
+    connection.query(selectQuery, [username], (error, friendResults) => {
       if (error) {
-        console.error('프로필 조회 오류:', error);
-        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
+        console.error('DB 조회 오류:', error);
+        return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
       }
-
-      // 프로필 메시지를 결과에 추가
-      for (const result of results) {
-        const profile = profileResults.find(profile => profile.username === result.friend_id);
-        if (profile) {
-          result.profile_message = profile.profile_message;
-          result.nickname = profile.nickname;
-          result.current_icon = profile.current_icon;
+  
+      // 친구 목록의 프로필 메시지 조회
+      const friendIds = friendResults.map(result => result.friend_id); // 여기가 수정된 부분입니다.
+      const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
+      connection.query(profileQuery, [friendIds], (error, profileResults) => {
+        if (error) {
+          console.error('프로필 조회 오류:', error);
+          return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
         }
-      }
->>>>>>> 2c05350c35a57846f9c50121f9db1759b697b2d2
-
-      res.json(results);
+  
+        // 프로필 메시지를 결과에 추가
+        const resultsWithProfile = friendResults.map(friendResult => {
+          const profile = profileResults.find(profile => profile.username === friendResult.friend_id);
+          return {
+            ...friendResult,
+            profile_message: profile ? profile.profile_message : null,
+            nickname: profile ? profile.nickname : null,
+            current_icon: profile ? profile.current_icon : null,
+          };
+        });
+  
+        res.json(resultsWithProfile);
+      });
     });
   });
-});
 
 app.put('/profileMessage', (req, res) => {
   const { profileMessage, username } = req.body;
@@ -430,6 +421,49 @@ app.put('/icon/set', (req, res) => {
     res.json(results);
   });
 });
+
+// Admin 아이콘 업로드 API
+app.post('/upload-icon', upload.single('iconFile'), (req, res) => {
+  const { iconName, iconPrice } = req.body;
+  const iconFile = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+  try {
+    // 데이터베이스에 아이콘 정보 저장
+    connection.query('INSERT INTO icon_shop (IconName, IconFile, IconPrice) VALUES (?, ?, ?)', [iconName, iconFile, iconPrice], (error, results, fields) => {
+      if (error) {
+        console.error('Database error:', error);
+        res.status(500).send('Error saving icon info to the database');
+      } else {
+        console.log('Inserted Icon ID:', results.insertId); // 삽입된 아이콘의 ID 출력
+        res.send('File uploaded and icon info saved successfully');
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// 아이콘 목록 조회 API
+app.get('/api/icons', (req, res) => {
+  try {
+    // 데이터베이스에서 아이콘 목록을 조회
+    connection.query('SELECT * FROM icon_shop', (error, results, fields) => {
+      if (error) {
+        console.error('Database error:', error);
+        res.status(500).send('Error fetching icon list from the database');
+      } else {
+        res.json(results); // 조회된 아이콘 목록을 JSON 형태로 응답
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+
 
 
 // <초기세팅> 서버실행 및 서버 종료(엔드포인트 코드이므로 항상 맨 마지막에 배치하기.)
