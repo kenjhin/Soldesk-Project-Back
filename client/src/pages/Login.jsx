@@ -16,7 +16,6 @@ function Login() {
   const [modalShow, setModalShow] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
 
   function handleTextInputValueChange(value) {
     setUsername(value);

@@ -7,19 +7,33 @@ import "../styles/App.css";
 // img
 import storeIco from "../assets/img/home/nav-icon-store.png";
 import inventoryIco from "../assets/img/home/nav-icon-collections.png";
-import hamsterIcon from '../assets/img/hamster.jpg';
+// user_icon
+import icon_hamster from "../assets/img/icons/hamster.jpg";
+import icon_challenger from "../assets/img/icons/challenger.jpg";
+import icon_poro1 from "../assets/img/icons/poro1.png";
+import icon_poro2 from "../assets/img/icons/poro2.jpg";
+import icon_tomkenchi from "../assets/img/icons/탐켄띠.jpg";
+import icon_default from "../assets/img/icons/Default.jpg";
+import icon_latteArt from "../assets/img/icons/latteArt.png";
 // pages
 import Main from "./Main";
 // components
 import IconSetModal from '../components/modals/IconSetModal';
 import MyInfoModal from '../components/modals/MyInfoModal';
 import Messenger from "../components/Messenger";
+import EditableText from "../components/EditableText";
+import { useIcon } from "../contexts/IconContext";
 
 function Home({setLogined}) {
 
-    const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
-    const navigate = useNavigate();
-    const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
+  const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
+  const navigate = useNavigate();
+  const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
+  const { icons, setIcons } = useIcon();
+
+  useEffect(() => {
+    setIcons([icon_default, icon_hamster, icon_challenger, icon_poro1, icon_poro2, icon_tomkenchi, icon_latteArt ]); 
+  }, [setIcons]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,10 +48,10 @@ function Home({setLogined}) {
         console.error('유저 데이터 로드 중 오류 발생:', error);
       }
     };
-
     fetchUserData();
   }, [setUserData]); // 의존성 배열에 setUserData 추가
   
+
 
 
   // 로그아웃 기능 임시 함수
@@ -54,7 +68,17 @@ function Home({setLogined}) {
       console.error('로그아웃 요청 실패:', error);
     }
   };
-
+  
+  const handleEditSave = async (text) => {
+    try {
+      await axios.put(`http://localhost:3001/profileMessage`, {
+        profileMessage: text,
+        username: userData.username
+      });
+    } catch (error) {
+      console.error('상태메시지 수정 중 오류 발생:', error);
+    }
+  };
 
   return (
     <div className="homeBody">
@@ -86,20 +110,25 @@ function Home({setLogined}) {
           </div>
         </div>
         <div className="headerProfileBox">
-          {/* hamster에 현재 로그인한 계정의 아이콘 받아오기 */}
           {userData && (
-    <IconSetModal
-      img={<img className="userIcon" src={userData.icon || hamsterIcon} alt="" />}
-    />
-  )}
-  {userData && (
+            <IconSetModal
+              img={<img className="userIcon" src={icons[userData.current_icon]} alt="" />}
+            />
+          )}
+          {userData && (
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>
-            <p className="profileMessage">"{userData.profileMessage}"</p>
+            <EditableText
+              text={userData.profile_message}
+              onSave={(newMessage) => {
+                handleEditSave(newMessage);
+                setUserData({...userData, profile_message: newMessage});
+              }}
+            />
           </div>
           )}
           <button className="logoutBtn" onClick={handleLogout}>
-            logout
+            로그아웃
           </button>
         </div>
       </header>

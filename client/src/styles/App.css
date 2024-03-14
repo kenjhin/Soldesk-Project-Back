@@ -64,10 +64,25 @@ body{
   justify-content: flex-end;
   /* border: white 1px solid; */
 }.headerProfileBox{
+  position: relative;
   margin-left: 0px;
   width: 270px;
   display: flex;
   align-items: center;
+  .logoutBtn{
+    position: absolute;
+      right: 0px;
+    top: 3px;
+    background: #1E2328;
+    color: #CDBE91;
+    border: #785A28 1px solid;
+    border-top: none;
+    font-size: 14px;
+    &:hover{
+      background: linear-gradient(180deg,rgba(255,255,255,0) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+    }
+  
+  }
 }.noticeBtn{
   margin-left: 20px;
   margin-right: 20px;
@@ -179,8 +194,8 @@ body{
   filter: saturate(0%);
 }.messenger-friend-area{
   width: 100%;
-  height: calc(100% - 40px - 40px);
-  max-height: calc(100% - 40px - 40px);
+  height: 765px;
+  max-height: 765px;
   overflow: auto;
   display: inline-block;
   .messenger-friend-group{
@@ -189,6 +204,8 @@ body{
     flex-wrap: wrap;
     
     .messenger-group-header{
+      display: flex;
+      align-items: flex-end;
       width: 100%;
       height: 25px;
       background-color: #020e17;
@@ -197,10 +214,9 @@ body{
       cursor: pointer;
       margin-bottom: 2px;
       padding-left: 10px;
-      
-      span{
-        vertical-align: middle;
-      }
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
     .messenger-friend-list{
       display: flex;
@@ -236,11 +252,17 @@ body{
         .friend-id{
           flex-basis: 100%;
           color: #d3c495;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
         }
         .friend-profile-message{
           flex-basis: 100%;
           color: #d3c39580;
           font-size: 14px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
         }
       }
       
@@ -255,23 +277,26 @@ body{
   height: 40px;
   display: flex;
   align-items: center;
-}
-.chatBtn{
-  background-image:url(../assets/img/messenger/chat_button.png); 
-  background-size: 152px;
-  background-position:0 0;
-  width: 152px;
-  height: 128px;
-  /* scale기준점 */
-  transform-origin: left;
-  scale: calc(40/128);
-  border: none;
-  outline: none;
-  &:hover{
-    background-position:0 -128px;
-  }
-  &:active{
-    background-position:0 calc(-128px * 2);
+
+  .chatBtn{
+    position: absolute;
+    bottom: -44px;
+    background-image:url(../assets/img/messenger/chat_button.png); 
+    background-size: 152px;
+    background-position:0 0;
+    width: 152px;
+    height: 128px;
+    /* scale기준점 */
+    transform-origin: left;
+    scale: calc(40/128);
+    border: none;
+    outline: none;
+    &:hover{
+      background-position:0 -128px;
+    }
+    &:active{
+      background-position:0 calc(-128px * 2);
+    }
   }
 }
 .chatModal{
@@ -282,7 +307,7 @@ body{
   right: 270px;
   bottom: 0px;
   display: flex;
-
+  z-index: 5;
   .chat-list-container{
     width: 250px;
     
@@ -501,15 +526,21 @@ body{
     font-weight: bold;
   }
 }.iconSelectArea{
-  border: #463714 solid 1px;
+  outline: #463714 solid 1px;
   height: 480px;
-  width: 710px;
+  width: 670px;
+  padding: 5px;
+}.icon-container{
   display: flex;
   flex-wrap: wrap;
+  height: auto;
 }.iconsBox{
-  padding: 10px;
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  
   img{
-    flex-basis: 100px;
+    width: 100px;
     height: 100px;
     border: #7c6224 solid 3px;
     object-fit: cover;    /* 이미지 비율 유지 */
@@ -540,9 +571,7 @@ body{
     color: green;
   }
 }
-.logoutBtn{
- 
-}
+
 
 
 
