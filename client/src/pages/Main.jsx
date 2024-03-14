@@ -13,7 +13,7 @@ const Main = () => {
   const [posts, setPosts] = useState();
 
   useEffect(() => {
-    // DB 게시글 파일들 받아오기
+    // DB 게시글 파일들 받아오기dddd
     setPosts();
   }, []); // 처음 화면 떴을 때 실행
 

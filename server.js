@@ -71,7 +71,7 @@ app.get('/',  (req,res) => {
 // <POST> 회원가입 API
 app.post('/signup', (req, res) => {
   // 요청 본문에서 데이터 추출
-  const { username, password, confirmPassword, nickname, address, authority, icon } = req.body;
+  const { username, password, confirmPassword, nickname, address, authority } = req.body;
   const addressString = JSON.stringify(address);
   // 입력값 유효성 검사
   if (!username || !password || !confirmPassword || password !== confirmPassword) {
@@ -87,7 +87,7 @@ app.post('/signup', (req, res) => {
   // MySQL 쿼리 실행, addressString을 쿼리 파라미터로 전달
 
   connection.query(query, 
-    [username, password, nickname, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
+    [username, password, nickname, addressString, authority], // 여기에서 address 대신 addressString 사용
     (error, results) => {
 
 
@@ -281,6 +281,18 @@ app.get('/api/posts/list', (req, res) => {
     }
 
     res.json(results);
+  });
+});
+
+// 게시물 홈화면에 좋아요 순으로 표시
+app.get('/api/posts/likes', (req, res) => {
+  const query = 'SELECT * FROM post ORDER BY likes DESC';
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('게시글 가져오기 실패:', error);
+      return res.status(500).json({ message: '서버 오류로 인해 게시글을 가져올 수 없습니다.' });
+    }
+    res.status(200).json(results);
   });
 });
 
