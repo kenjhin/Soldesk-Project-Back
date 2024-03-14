@@ -375,13 +375,13 @@ app.get('/chatData', (req, res) => {
 // 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
-  // console.log([senderId, receiverId, content])
+   console.log([senderId, receiverId, content])
 
   const userQuery = 'SELECT username FROM user WHERE username = ?';
   connection.query(userQuery, [receiverId], (error, results) => {
     if (error || results.length === 0) {
-      console.error('User fetch error:', error);
-      return res.status(500).json({ message: 'User fetch error' });
+      console.error('(Chat)User fetch error:', error);
+      return res.status(500).json({ message: '(Chat)User fetch error' });
     }
     // console.log(`chat send : ${results}`);
 
