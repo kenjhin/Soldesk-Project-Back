@@ -94,7 +94,6 @@ function SignUpModal({show, onHide}) {
             nickname: '',
             address: '',
             authority: 'user',
-            icon: 'null'
           });
           alert('회원가입 성공!');
           onHide(); // 모달 닫기
