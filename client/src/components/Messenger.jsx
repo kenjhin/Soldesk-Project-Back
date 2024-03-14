@@ -20,8 +20,7 @@ const Messenger = () => {
   const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
   const [userFriends, setUserFriends] = useState([]);
   const { icons, setIcons } = useIcon();
-  const [chatTarget, setChatTarget] = useState();
-  const [targetInfo, setTargetInfo] = useState([]);
+  const [chatTarget, setChatTarget] = useState([]);
   const [currentChat, setCurrentChat] = useState({
     senderId: '',
     receiverId: '',
@@ -39,8 +38,7 @@ const Messenger = () => {
   };
   
   const openChatModal = (friendInfo) => {
-    setChatTarget(friendInfo.nickname);
-    setTargetInfo(friendInfo);
+    setChatTarget(friendInfo);
     setModalShow(true);
   };
 
@@ -177,8 +175,8 @@ const Messenger = () => {
             setChatTarget={setChatTarget}
             currentChat={currentChat}
             setCurrentChat={setCurrentChat}
-            targetInfo={targetInfo}
             icons={icons}
+            userFriends={userFriends}
           />
         )}
         <button className='chatBtn' onClick={()=>{setModalShow((e) => !e)}}/>
