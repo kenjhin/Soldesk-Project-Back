@@ -113,10 +113,11 @@ function Home({setLogined}) {
           </div>
         </div>
         <div className="headerProfileBox">
-          {userData && (
-            <IconSetModal
-            img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}/>
-          )}
+        {userData && currentIcon && (
+    <IconSetModal
+      img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}
+    />
+  )}
           {userData && (
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>
