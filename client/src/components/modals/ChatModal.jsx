@@ -7,6 +7,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
   const scrollRef = useRef();
   const prevScrollHeight = useRef();
 
+  // chat버튼으로 열었을 때 채팅 스크롤 및 최근 chatTarget 설정
   useEffect(() => {
     // 채팅 스크롤 아래에서 시작
     // 현재 스크롤 위치 = 현재 스크롤 길이
@@ -40,6 +41,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
     }
   }, []);
 
+  // 친구 리스트에서 눌러서 열었을 때 채팅 스크롤 설정
   useEffect(() => {
     // 현재 채팅 목록에서 receiver_id 또는 senderId가 chatTarget과 일치하는 경우에만 스크롤 조절
     const shouldAdjustScroll = myChat.some(data => data.receiver_id === chatTarget.friend_id || data.sender_id === chatTarget.friend_id);
@@ -54,15 +56,10 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
         prevScrollHeight.current = currentScrollHeight;
       }
     }
-
+    
   }, [myChat, chatTarget]);
-  
-// 1. senderId가 내 아이디인 채팅을 DB에서 싹 가져온다.
-// 2. receiverId가 내 아이디인 채팅을 싹 가져온다.
-// 3. 메시지들을 시간순으로 정렬
-// 4. 반복문 돌려서 출력한다.
 
-  // 채팅
+  // 채팅 Box
   const ChatBox = ({action, content}) =>{
     return(
       <div className='chat-content-container'>
@@ -72,7 +69,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
       </div>
   )}
 
-  // 채팅 post 요청
+  // 채팅 post 보내기
   const handleChatSend = async () => {
     if (!userData) {
         alert('로그인 세션이 만료되었습니다.');
@@ -91,6 +88,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
     }
   };
   
+  // 채팅창 엔터누를 때
   const handleKeyDown = (e) => {
     // 엔터누를 때 + 공백방지
     if (e.key === 'Enter' && currentChat.content.trim() !== '') {
@@ -106,15 +104,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
     }
   };
   
-  const getChatTargetIcon = () => {
-    const chatTargetFriend = userFriends.find((data) => data.friend_id === chatTarget.friend_id);
-    if (chatTargetFriend) {
-      const iconIndex = chatTargetFriend.current_icon;
-      return icons[iconIndex];
-    }
-    return null;
-  };
-  
+  // 채팅 리스트 최근 채팅순 정렬
   const sortedFriends = [...new Set(myChat.map(data => (data.receiver_id === userData.username ? data.sender_id : data.receiver_id)))]
   .map((friendId, i) => ({
     friendId,

@@ -136,7 +136,6 @@ function Home({setLogined}) {
         <Messenger />
         <Main />
       </main>
-      <footer></footer>
     </div>
   );
 }
