@@ -29,7 +29,8 @@ function Home({setLogined}) {
   const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
   const navigate = useNavigate();
   const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
-  const { icons, setIcons } = useIcon();
+  const { userIcons, setIcons } = useIcon();
+  const currentIcon = userIcons.find(icon => icon.isCurrent === 1);
 
   useEffect(() => {
     setIcons([icon_default, icon_hamster, icon_challenger, icon_poro1, icon_poro2, icon_tomkenchi, icon_latteArt ]); 
@@ -114,8 +115,7 @@ function Home({setLogined}) {
         <div className="headerProfileBox">
           {userData && (
             <IconSetModal
-              img={<img className="userIcon" src={icons[userData.current_icon]} alt="" />}
-            />
+            img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}/>
           )}
           {userData && (
           <div className="nameBox">
