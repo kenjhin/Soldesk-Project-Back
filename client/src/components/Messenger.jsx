@@ -135,7 +135,6 @@ const Messenger = () => {
   
   return (
     <div className="messenger">
-      <FriendRequests friendRequest={friendRequest}/>
       <div className="messengerHeaderBtnBox">
         <p className="messengerText">커뮤니티</p>
         <button className="messengerHeaderBtn">
@@ -151,6 +150,7 @@ const Messenger = () => {
           <img src={addPerson} alt=''/>
         </button>
       </div>
+      <FriendRequests friendRequest={friendRequest}/>
       {addFriendModalShow && 
       <AddFriendModal 
         show={addFriendModalShow} 

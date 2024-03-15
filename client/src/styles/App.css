@@ -161,7 +161,7 @@ body{
 .messenger{
   width: 270px;
   height: 850px;
-  background-color: #040f18;
+  background-color: #05121d;
   float: right;
 }.messengerHeaderBtnBox{
   width: 100%;
@@ -217,6 +217,13 @@ body{
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      margin-bottom: 5px;
+      &:hover{
+        background-color: #ffffff21;
+      }
+      &:active{
+        background-color: #9b9b9b21;
+      }
     }
     .messenger-friend-list{
       display: flex;
@@ -228,7 +235,7 @@ body{
       cursor: pointer;
 
       &:hover{
-        background-color: #464646bb;
+        background-color: #ffffff21;
       }
       .friend-icon {
         width: 40px;
@@ -265,10 +272,8 @@ body{
           white-space: nowrap;
         }
       }
-      
     }
   }
-  
 }
 .messengerFooterBtnBox{
   position: relative;

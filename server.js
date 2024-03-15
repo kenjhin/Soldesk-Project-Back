@@ -314,7 +314,7 @@ app.get('/api/posts/likes', (req, res) => {
 // <PUT> 게시판 수정 API
 app.put('/api/posts/:id', (req, res) => {
   const { id } = req.params; // URL에서 게시물 ID 추출
-  const { title, content } = req.body; // 요청 본문에서 제목과 내용 추출
+  const { title, content, likes, views } = req.body; // 수정시 본문에서 제목과 내용 추출 / 좋아요 눌렀을 때 / 게시물열릴때
 
   // 게시물이 존재하는지 확인하는 쿼리
   const checkQuery = 'SELECT * FROM post WHERE id = ?';
@@ -323,26 +323,63 @@ app.put('/api/posts/:id', (req, res) => {
       console.error('게시물-DB 체크 오류:', checkError);
       return res.status(500).json({ message: '게시물 찾기에 실패했음.' });
     }
-
+    
     if (checkResults.length === 0) {
       return res.status(404).json({ message: '게시물이 존재하지 않습니다.' });
     }
+    
+    // 좋아요눌렀으면
+    if(likes){
+      const updateQuery = 'UPDATE post SET likes = ? WHERE id = ?';
+      connection.query(updateQuery, [likes, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('좋아요 수정 에러:', updateError);
+          return res.status(500).json({ message: '좋아요 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+        res.json();
+      });
+    }
 
-    // 게시물 업데이트 쿼리
-    const updateQuery = 'UPDATE post SET title = ?, content = ? WHERE id = ?';
-    connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
-      if (updateError) {
-        console.error('게시물 수정 에러:', updateError);
-        return res.status(500).json({ message: '게시물 수정에 실패 했습니다.' });
-      }
+    // 게시물 새로고침될때
+    if(views){
+      const updateQuery = 'UPDATE post SET views = ? WHERE id = ?';
+      connection.query(updateQuery, [views, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('조회수 수정 에러:', updateError);
+          return res.status(500).json({ message: '조회수 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+        res.json();
+      });
+    }
 
-      if (updateResults.affectedRows === 0) {
-        // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
-        return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
-      }
-
-      res.json({ message: '게시물이 성공적으로 수정되었습니다.' });
-    });
+    // 수정경로로 들어갔으면
+    if(title){
+      // 게시물 업데이트 쿼리
+      const updateQuery = 'UPDATE post SET title = ?, content = ? WHERE id = ?';
+      connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('게시물 수정 에러:', updateError);
+          return res.status(500).json({ message: '게시물 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+  
+        res.json({ message: '게시물이 성공적으로 수정되었습니다.' });
+      });
+    }
   });
 });
 
@@ -531,10 +568,10 @@ app.put('/icon/set', (req, res) => {
 // <초기세팅> 서버실행 및 서버 종료(엔드포인트 코드이므로 항상 맨 마지막에 배치하기.)
 // 서버 Port 3001 : http://localhost:3001
 app.listen(3001, () => {
-        console.log('[Soldesk Node Server + React]');
-        process.on('SIGINT', () => {
-          console.log('Server is shutting down');
-          connection.end();
-          process.exit();
-        });
-     });
+  console.log('[Soldesk Node Server + React]');
+  process.on('SIGINT', () => {
+    console.log('Server is shutting down');
+    connection.end();
+    process.exit();
+  });
+});

@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext'; // UserContext 유저 데이터 받아옴.
+import '../styles/Post.css'
 
 const Post = () => {
   const { userData } = useUser(); // 현재 로그인한 유저 정보 사용

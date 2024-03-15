@@ -31,20 +31,35 @@ const FriendRequestModal = ({show, onClose, friendRequest}) => {
         <div className='close-wrapper'>
             <span className='close' onClick={onClose}>&times;</span>
         </div>
-        {/* <input placeholder='플레이어 이름' value={friendId} onChange={(e) => {setFriendId(e.target.value)}} />
-        <button onClick={handleAddFriend}>친구 추가</button> */}
-        <h2 style={{marginTop: '100px', color: 'gray'}}>친구 요청{friendRequest.length!== 0 && `(${friendRequest.length})`}</h2>
+        <div className='request-header-box'>
+          <span>친구 요청{friendRequest.length!== 0 && `(${friendRequest.length})`}</span>
+        </div>
+        <div className='request-body-container'>
         {friendRequest.map((data, i) => (
-          <div key={i}>
-            <div>{data.nickname}</div>
-            <button onClick={() => handleAcceptFriendRequest(data.id)}>
-              <img src={check} alt=''/>
-            </button>
-            <button onClick={() => handleRejectFriendRequest(data.id)}>
+          <div key={i} className='request-list-container'>
+            <div className='request-userIcon-box'>
               <img src={x} alt=''/>
-            </button>
+            </div>
+            <div className='request-userInfo-container'>
+              {/* <img src={} alt=''/> */}
+              <div className='request-nickname-box'>
+                {data.nickname}
+              </div>
+              <div className='request-text-box'>
+                <span>친구 요청</span>
+              </div>
+            </div>
+            <div className='request-btn-container'>
+              <button onClick={() => handleAcceptFriendRequest(data.id)}>
+                <img src={check} alt=''/>
+              </button>
+              <button onClick={() => handleRejectFriendRequest(data.id)}>
+                <img src={x} alt=''/>
+              </button>
+            </div>
           </div>
         ))}
+        </div>
       </div>
     </div>
   )

@@ -62,9 +62,7 @@ const AddFriendModal = ({ show, onClose, onAddFriend, userFriends }) => {
         </div>
         <p>친구추가</p>
         <input placeholder='플레이어 이름' value={friendNickname} onChange={(e) => {setFriendId(e.target.value)}} autoFocus/>
-        <button onClick={handleAddFriend}>친구 추가</button>
-        <h2 style={{marginTop: '100px', color: 'gray'}}>★ 상점에서 아이콘을 구매해보세요! ★</h2>
-        
+        <button onClick={handleAddFriend}>친구 추가</button>   
       </div>
     </div>
   );
