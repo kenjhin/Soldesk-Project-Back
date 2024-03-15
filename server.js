@@ -85,23 +85,24 @@ app.get('/',  (req,res) => {
 // <POST> 회원가입 API
 app.post('/signup', (req, res) => {
   // 요청 본문에서 데이터 추출
-  const { username, password, confirmPassword, nickname, address, authority, icon } = req.body;
+  const { username, password, confirmPassword, nickname, address, authority } = req.body;
   const addressString = JSON.stringify(address);
   // 입력값 유효성 검사
   if (!username || !password || !confirmPassword || password !== confirmPassword) {
     return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
   }
 
-    // MySQL 회원가입 쿼리
+  // 기본 보유 아이콘목록
+  const default_ownedIcon = [0];
+  const default_ownedIconString = JSON.stringify(default_ownedIcon);
+
+  // MySQL 회원가입 쿼리
   const query = `
-  INSERT INTO user (username, password, nickname, address, authority, current_icon)
+  INSERT INTO user (username, password, nickname, address, authority, owned_icon)
   VALUES (?, ?, ?, ?, ?, ?)
 `;
-
-  // MySQL 쿼리 실행, addressString을 쿼리 파라미터로 전달
-
   connection.query(query, 
-    [username, password, nickname, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
+    [username, password, nickname, addressString, authority, default_ownedIconString], // 여기에서 address 대신 addressString 사용
     (error, results) => {
 
 
@@ -246,6 +247,19 @@ app.get('/userData', (req, res) => {
     });
   });
 
+app.get('/Users/Nickname', (req, res) => {
+  // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
+  const selectQuery = 'SELECT nickname FROM user';
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      console.error('DB 조회 오류:', error);
+      return res.status(500).json({ success: false, error: 'Users.Nickname을 조회할 수 없습니다.' });
+    }
+
+    res.json(results);
+  });
+});
+
 app.put('/profileMessage', (req, res) => {
   const { profileMessage, username } = req.body;
 
@@ -300,6 +314,18 @@ app.get('/api/posts/list', (req, res) => {
     }
 
     res.json(results);
+  });
+});
+
+// 게시물 홈화면에 좋아요 순으로 표시
+app.get('/api/posts/likes', (req, res) => {
+  const query = 'SELECT * FROM post ORDER BY likes DESC';
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('게시글 가져오기 실패:', error);
+      return res.status(500).json({ message: '서버 오류로 인해 게시글을 가져올 수 없습니다.' });
+    }
+    res.status(200).json(results);
   });
 });
 
@@ -382,15 +408,14 @@ app.get('/chatData', (req, res) => {
 // 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
-  // console.log([senderId, receiverId, content])
+
 
   const userQuery = 'SELECT username FROM user WHERE username = ?';
   connection.query(userQuery, [receiverId], (error, results) => {
     if (error || results.length === 0) {
-      console.error('User fetch error:', error);
-      return res.status(500).json({ message: 'User fetch error' });
+      console.error('(Chat)User fetch error:', error);
+      return res.status(500).json({ message: '(Chat)User fetch error' });
     }
-    // console.log(`chat send : ${results}`);
 
     // 채팅 Insert Query
     const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
@@ -405,10 +430,109 @@ app.post('/chat/send', (req, res) => {
   });
 });
 
+// 친추 받아오기
+app.get('/friendRequest/receive', (req, res) => {
+  const username = req.session.username;
+
+  const selectQuery = `
+    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname 
+    FROM friend_requests fr 
+    INNER JOIN user u ON fr.sender_id = u.username 
+    WHERE fr.receiver_id = ? AND fr.status = 'awaiting'
+  `;
+  connection.query(selectQuery, [username], (error, results) => {
+    if (error) {
+      console.error('Fetch friend-requests error:', error);
+      return res.status(500).json({ message: 'Error fetching friend-requests' });
+    }
+
+    res.json(results);
+  });
+});
+
+// 친추 보내기
+app.post('/friendRequest/send', (req, res) => {
+  const { senderId, receiverNickname } = req.body;
+
+  const userQuery = 'SELECT username FROM user WHERE nickname = ?';
+  connection.query(userQuery, [receiverNickname], (error, results) => {
+    if (error || results.length === 0) {
+      console.error('(Chat)User fetch error:', error);
+      return res.status(500).json({ message: '(Chat)User fetch error' });
+    }
+
+    const receiverId = results[0].username;
+
+    // 채팅 Insert Query
+    const insertQuery = 'INSERT INTO friend_requests (sender_id, receiver_id) VALUES (?, ?)';
+    connection.query(insertQuery, [senderId, receiverId ], (insertError, insertResults) => {
+      if (insertError) {
+        console.error('Insert friend-request error:', insertError);
+        return res.status(500).json({ message: 'Insert friend-request error' });
+      }
+      
+      res.status(201).json({ message: 'friend-request created successfully' });
+    });
+  });
+});
+
+app.put('/friendRequest/accept', (req, res) => {
+  const { requestId } = req.body;
+
+  const getRequestQuery = 'SELECT * FROM friend_requests WHERE id = ?';
+  connection.query(getRequestQuery, [requestId], (error, results) => {
+    if (error) {
+      console.error('Friend request fetch error:', error);
+      return res.status(500).json({ message: 'Friend request fetch error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Friend request not found' });
+    }
+
+    const request = results[0];
+    
+    // user_friend 테이블에 새로운 친구 관계 추가
+    const addFriendQuery = 'INSERT INTO user_friends (user_id, friend_id) VALUES (?, ?), (?, ?)';
+    connection.query(addFriendQuery, [request.sender_id, request.receiver_id, request.receiver_id, request.sender_id], (addFriendError) => {
+      if (addFriendError) {
+        console.error('Add friend error:', addFriendError);
+        return res.status(500).json({ message: 'Add friend error' });
+      }
+
+      const updateRequestQuery = 'UPDATE friend_requests SET status = "accepted" WHERE id = ?';
+      connection.query(updateRequestQuery, [requestId], (error, results) => {
+        if (error) {
+          console.error('Friend request update error:', error);
+          return res.status(500).json({ message: 'Friend request update error' });
+        }
+
+        // 요청이 성공적으로 업데이트되었음을 클라이언트에 응답
+        res.status(200).json({ message: 'Friend request accepted successfully' });
+      });
+    });
+  });
+});
+
+app.put('/friendRequest/reject', (req, res) => {
+  const { requestId } = req.body;
+
+  // friend_request 테이블에서 해당 요청을 업데이트
+  const updateRequestQuery = 'UPDATE friend_requests SET status = "rejected" WHERE id = ?';
+  connection.query(updateRequestQuery, [requestId], (error, results) => {
+    if (error) {
+      console.error('Friend request update error:', error);
+      return res.status(500).json({ message: 'Friend request update error' });
+    }
+
+    // 요청이 성공적으로 업데이트되었음을 클라이언트에 응답
+    res.status(200).json({ message: 'Friend request rejected successfully' });
+  });
+});
+
 // 아이콘 Update
 app.put('/icon/set', (req, res) => {
   const { currentIcon, username } = req.body;
-  console.log([currentIcon, username]);
 
   const updateQuery = 'UPDATE user SET current_icon = ? WHERE username = ?';
   connection.query(updateQuery, [currentIcon, username], (updateError, results) => {

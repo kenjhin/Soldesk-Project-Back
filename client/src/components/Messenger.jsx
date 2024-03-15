@@ -12,23 +12,27 @@ import AddFriendModal from './modals/AddFriendModal';
 import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
 import { useIcon } from '../contexts/IconContext';
+import FriendRequests from './FriendRequests';
 
 const Messenger = () => {
-  const [modalShow, setModalShow] = useState(false);
-  const [addFriendModalShow, setAddFriendModalShow] = useState(false);
-  const [myChat, setMyChat] = useState([]);
-  const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
-  const [userFriends, setUserFriends] = useState([]);
+  // context
+  const { userData, setUserData } = useUser();
   const { icons, setIcons } = useIcon();
-  const [chatTarget, setChatTarget] = useState();
-  const [targetInfo, setTargetInfo] = useState([]);
-  const [currentChat, setCurrentChat] = useState({
-    senderId: '',
-    receiverId: '',
-    content: '',
-  });
+
+  // 그룹
   const [expandedGroups, setExpandedGroups] = useState();
   const [uniqueGroupNames, setUniqueGroupNames] = useState([]);
+
+  // 친구
+  const [userFriends, setUserFriends] = useState([]);
+  const [addFriendModalShow, setAddFriendModalShow] = useState(false);
+  const [friendRequest, setFriendRequest] = useState([]);
+
+  //채팅
+  const [modalShow, setModalShow] = useState(false);
+  const [myChat, setMyChat] = useState([]);
+  const [chatTarget, setChatTarget] = useState([]);
+  const [currentChat, setCurrentChat] = useState({});
 
   const toggleGroup = (groupName) => {
     if (expandedGroups.includes(groupName)) {
@@ -39,8 +43,7 @@ const Messenger = () => {
   };
   
   const openChatModal = (friendInfo) => {
-    setChatTarget(friendInfo.nickname);
-    setTargetInfo(friendInfo);
+    setChatTarget(friendInfo);
     setModalShow(true);
   };
 
@@ -50,11 +53,11 @@ const Messenger = () => {
 
   const handleAddFriend = () => {
     // 로직구현필요
-    setAddFriendModalShow(false);
+    
   };
 
 
-  
+  // 친구정보 받아오기
   useEffect(() => {
     const fetchUserFriends = async () => {
       try {
@@ -69,6 +72,7 @@ const Messenger = () => {
     fetchUserFriends();
   }, [chatTarget]); // 친구 요청받거나 채팅바뀌거나할때마다 
 
+  // myChat 받아오기
   useEffect(() => {
     const fetchMyChat = async () => {
       try {
@@ -86,6 +90,22 @@ const Messenger = () => {
     return () => clearInterval(intervalId);
   }, []); 
 
+  // 친구요청 받아오기
+  useEffect(() => {
+    const fetchFriendRequest = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/friendRequest/receive', { withCredentials: true });
+        setFriendRequest(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('FriendRequest 로드 중 오류 발생:', error);
+      }
+    };
+
+    fetchFriendRequest();
+  }, [friendRequest.status]);
+
+  // 그룹 관리
   useEffect(() => {
     // 친구 그룹 확장 여부 설정
     const allGroupNames = [...new Set(userFriends.map((group) => group.group_name))];
@@ -110,11 +130,12 @@ const Messenger = () => {
     }
     return sortedGroupNames;
   };
-  // 친구요청 보낸거 받으면 서로의 friends에 상대 id추가
-  // 상대id.profileMessage 받아오기
 
+
+  
   return (
     <div className="messenger">
+      <FriendRequests friendRequest={friendRequest}/>
       <div className="messengerHeaderBtnBox">
         <p className="messengerText">커뮤니티</p>
         <button className="messengerHeaderBtn">
@@ -135,6 +156,7 @@ const Messenger = () => {
         show={addFriendModalShow} 
         onClose={() => setAddFriendModalShow(false)} 
         onAddFriend={handleAddFriend}
+        userFriends={userFriends}
       />}
       
       <div className="messenger-friend-area">
@@ -177,8 +199,8 @@ const Messenger = () => {
             setChatTarget={setChatTarget}
             currentChat={currentChat}
             setCurrentChat={setCurrentChat}
-            targetInfo={targetInfo}
             icons={icons}
+            userFriends={userFriends}
           />
         )}
         <button className='chatBtn' onClick={()=>{setModalShow((e) => !e)}}/>

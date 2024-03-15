@@ -48,7 +48,7 @@ const Board = () => {
               <th className="th_writer">작성자</th>
               <th className="th_date">작성일</th>
               <th className="th_views">조회수</th>
-              <th className="th_like">추천</th>
+              <th className="th_like">좋아요</th>
             </tr>
           </thead>
           <tbody> 
