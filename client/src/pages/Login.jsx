@@ -8,6 +8,7 @@ import arrow from "../assets/img/login/arrow_right.png"
 import riot_logo from "../assets/img/login/riot_logo.png"
 import TextInput from "../components/TextInput.jsx"
 import SignUpModal from "../components//modals/SignUpModal.jsx"
+import SimpleSlider from "../components/SimpleSlider.jsx";
 
 function Login() {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ function Login() {
   const [modalShow, setModalShow] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
 
   function handleTextInputValueChange(value) {
     setUsername(value);
@@ -24,6 +24,14 @@ function Login() {
   function handlePasswordChange(value) {
     setPassword(value);
   }
+
+  const handleKeyDown = (e) => {
+    // 엔터누를 때 + 공백방지
+    if (e.key === 'Enter') {
+      e.preventDefault(); // 기본 엔터 동작 방지
+      handleLoginClick();
+    }
+  };
 
   const handleLoginClick = async () => {
     try {
@@ -34,6 +42,7 @@ function Login() {
 
       if (response.data.success) {
         // 로그인 성공: 리다이렉트 경로로 이동
+        console.log('로그인 성공 Login.jsx')
         navigate(response.data.redirectPath || '/');
       } else {
         // 로그인 실패: 오류 메시지 처리
@@ -51,18 +60,20 @@ function Login() {
         <img className="loginLogo" src={riot_logo} alt=""/>
         <div className="loginLoginText">로그인</div>
         <div className="loginInputArea"> 
-          <TextInput label="계정이름" value={username} onInputChange={handleTextInputValueChange}/>
-          <TextInput label="비밀번호" type="password" value={password} onInputChange={handlePasswordChange}/>
+          <TextInput label="계정이름" value={username} onInputChange={handleTextInputValueChange} onKeyDown={handleKeyDown}/>
+          <TextInput label="비밀번호" type="password" value={password} onInputChange={handlePasswordChange} onKeyDown={handleKeyDown}/>
           <div className="idCheckboxContainer">
             <label className="idCheckLabel"><input className="idCheckbox" type="checkbox"/>로그인 상태 유지</label>
           </div>
         </div>
-        <button className="loginBtnContainer" onClick={handleLoginClick}><img className="loginBtn" src={arrow} alt=""/></button>
+        <button className="loginBtnContainer" onClick={handleLoginClick} >
+          <img className="loginBtn" src={arrow} alt=""/>
+        </button>
         <button className="singUpBtn" onClick={() => setModalShow(true)}>계정 생성</button>
         <SignUpModal show={modalShow} onHide={() => setModalShow(false)}/>
       </div>
-      <div className="loginBannerContainer">
-        <img className="loginBanner" src={loginBanner} alt="잉 기무링"/>
+      <div className="loginBanner-container">
+        <SimpleSlider/>
       </div>
     </div>
   )

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
+import { UserProvider } from './contexts/UserContext';
+import { IconProvider } from "./contexts/IconContext";
 // css
 import "./styles/App.css";
 // img
@@ -16,7 +18,6 @@ function App() {
   const [logined, setLogined] = useState(false);
   const navigate = useNavigate();
 
-
   // 로그인 체크
   useEffect(() => {
     const checkSession = async () => {
@@ -24,7 +25,10 @@ function App() {
         const response = await axios.get('http://localhost:3001/checkSession', { withCredentials: true });
         if (response.data.success) {
           setLogined(true);
-          navigate('/home'); // 로그인 성공 시 /home으로 직접 리다이렉트
+          // 현재 경로가 로그인 페이지나 루트 경로일 때만 /home으로 리다이렉트
+          if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            navigate('/home');
+          }
         } else {
           navigate('/login');
         }
@@ -35,19 +39,24 @@ function App() {
     };
   
     checkSession();
-  }, [navigate]);
+  },[navigate]);
 
 
 
 
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login setLogined={setLogined} />} />
-      <Route path="/home/*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
-      {/* 기본 경로 설정 */}
-      <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
-    </Routes>
+    <UserProvider>
+      <IconProvider>
+        <Routes>
+          <Route path="/login" element={<Login setLogined={setLogined} />} />
+          <Route path="*" element={logined ? <Home setLogined={setLogined} /> : <Navigate to="/login" replace />} />
+          {/* {/* 기본 경로 설정 */}
+          <Route path="/" element={<Navigate to={logined ? "/home" : "/login"} replace />} />
+        </Routes>
+      </IconProvider>
+    </UserProvider>
+
   );
 }
 

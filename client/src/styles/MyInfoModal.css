@@ -63,13 +63,13 @@
       font-weight: bolder;
       color: #f0de10;
     }
-  }.myInfo-1{
+  }.myInfo-fields-1{
     flex-basis: 100%;
     text-align: center;
     display: flex;
     align-items: center;
     flex-direction: column;
-  }.myInfo-2{
+  }.myInfo-fields-2{
     flex-basis: 100%;
     text-align: center;
     margin-top: 40px;

@@ -1,64 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, {  useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useUser } from '../contexts/UserContext';
 // css
 import "../styles/App.css";
 // img
 import storeIco from "../assets/img/home/nav-icon-store.png";
 import inventoryIco from "../assets/img/home/nav-icon-collections.png";
-import hamster from "../assets/img/hamster.jpg";
+// user_icon
+import icon_hamster from "../assets/img/icons/hamster.jpg";
+import icon_challenger from "../assets/img/icons/challenger.jpg";
+import icon_poro1 from "../assets/img/icons/poro1.png";
+import icon_poro2 from "../assets/img/icons/poro2.jpg";
+import icon_tomkenchi from "../assets/img/icons/탐켄띠.jpg";
+import icon_default from "../assets/img/icons/Default.jpg";
+import icon_latteArt from "../assets/img/icons/latteArt.png";
 // pages
 import Main from "./Main";
 // components
 import IconSetModal from '../components/modals/IconSetModal';
 import MyInfoModal from '../components/modals/MyInfoModal';
 import Messenger from "../components/Messenger";
+import EditableText from "../components/EditableText";
+import { useIcon } from "../contexts/IconContext";
 
 function Home({setLogined}) {
 
-    const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
-    const navigate = useNavigate();
-    const [userData, setUserData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
-    address: {
-      zonecode: '',
-      fullAddress: '',
-      detailAddress: ''
-    }
-  });
-  
+  const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
+  const navigate = useNavigate();
+  const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
+  const { userIcons, setIcons } = useIcon();
+  const currentIcon = userIcons.find(icon => icon.isCurrent === 1);
 
- // 유저 데이터 불러오기
- useEffect(() => {
+  useEffect(() => {
+    setIcons([icon_default, icon_hamster, icon_challenger, icon_poro1, icon_poro2, icon_tomkenchi, icon_latteArt ]); 
+  }, [setIcons]);
+
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get('http://localhost:3001/userData', { withCredentials: true });
         if (response.data.success) {
-          // 유저 데이터 세팅
-          setUserData(prevState => ({
-            ...prevState,
-            ...response.data.user,
-            icon: response.data.user.icon || hamster, // 예시로 hamster를 기본값으로 설정했습니다. 실제로는 서버에서 받아온 아이콘 URL을 사용해야 합니다.
-          }));
+          setUserData(response.data.user); // API 응답으로 받은 유저 데이터로 상태 업데이트
         } else {
-          // 유저 데이터 로드 실패 시 처리
           console.log('유저 데이터 로드 실패');
         }
       } catch (error) {
         console.error('유저 데이터 로드 중 오류 발생:', error);
       }
     };
-
     fetchUserData();
-  }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행되도록 합니다.
+  }, [setUserData]); // 의존성 배열에 setUserData 추가
   
+
 
 
   // 로그아웃 기능 임시 함수
-  
   const handleLogout = async () => {
     console.log("로그아웃 시도");
     try {
@@ -72,7 +69,17 @@ function Home({setLogined}) {
       console.error('로그아웃 요청 실패:', error);
     }
   };
-
+  
+  const handleEditSave = async (text) => {
+    try {
+      await axios.put(`http://localhost:3001/profileMessage`, {
+        profileMessage: text,
+        username: userData.username
+      });
+    } catch (error) {
+      console.error('상태메시지 수정 중 오류 발생:', error);
+    }
+  };
 
   return (
     <div className="homeBody">
@@ -98,22 +105,32 @@ function Home({setLogined}) {
             <button className="inventoryBtn mouseover">
               <img src={inventoryIco} alt="" />
             </button>
+            <Link to="/store">
             <button className="storeBtn mouseover">
-              <img src={storeIco} alt="" />
-            </button>
+              <img src={storeIco} alt="/store" />
+            </button>     
+            </Link>
           </div>
         </div>
         <div className="headerProfileBox">
-          {/* hamster에 현재 로그인한 계정의 아이콘 받아오기 */}
-          <IconSetModal
-            img={<img className="userIcon" src={userData.icon} alt="" />}
-          />
+          {userData && (
+            <IconSetModal
+            img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}/>
+          )}
+          {userData && (
           <div className="nameBox">
-            <p className="nickname">{userData.name}</p>
-            <p className="profileMessage">"{userData.profileMessage}"</p>
+            <p className="nickname">{userData.nickname}</p>
+            <EditableText
+              text={userData.profile_message}
+              onSave={(newMessage) => {
+                handleEditSave(newMessage);
+                setUserData({...userData, profile_message: newMessage});
+              }}
+            />
           </div>
+          )}
           <button className="logoutBtn" onClick={handleLogout}>
-            logout
+            로그아웃
           </button>
         </div>
       </header>
@@ -121,7 +138,6 @@ function Home({setLogined}) {
         <Messenger />
         <Main />
       </main>
-      <footer></footer>
     </div>
   );
 }

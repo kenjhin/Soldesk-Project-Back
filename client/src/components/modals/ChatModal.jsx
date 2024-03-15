@@ -1,27 +1,29 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from 'react'
-import getCurrentDateTime from '../function/getCurrentDateTime';
-import defaultIcon from "../../assets/img/hamster.jpg"
-const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, currentChat, setCurrentChat}) => {
+import axios from 'axios';
+
+const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, 
+                    currentChat, setCurrentChat, icons, userFriends}) => {
   const scrollRef = useRef();
+  const prevScrollHeight = useRef();
 
-  // senderId나 receiverId가 내 아이디인 모든 채팅들이 시간별로 정리된 것
-  
-
+  // chat버튼으로 열었을 때 채팅 스크롤 및 최근 chatTarget 설정
   useEffect(() => {
-    // DB데이터 불러오기
-    // setMyChat(DB)
-
     // 채팅 스크롤 아래에서 시작
     // 현재 스크롤 위치 = 현재 스크롤 길이
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+
+    // 친구리스트에서 친구 눌러서 채팅창 열었으면 해당 친구와의 채팅창 띄우기
+    if(chatTarget.friend_id){
+      return;
+    }
 
     // 가장 최근에 채팅한 사람 첫타겟으로 잡기
     // 최근 채팅한 상대방 내림차순으로
     const recentChat = myChat.reduce((recent, chat) => {
       if (
-        (chat.senderId === userData.nickname || chat.receiverId === userData.nickname) &&
-        (!recent || new Date(chat.date) > new Date(recent.date))
+        (chat.sender_id === userData.username || chat.receiver_id === userData.username) &&
+        (!recent || new Date(chat.created_at) > new Date(recent.created_at))
       ) {
         return chat;
       }
@@ -30,30 +32,34 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
   
     // 찾은 상대방을 기본 타겟으로 설정
     if (recentChat) {
-      setChatTarget(
-        recentChat.senderId === userData.nickname
-          ? recentChat.receiverId
-          : recentChat.senderId
-      );
+      const recentChatTarget = recentChat.sender_id === userData.username
+        ? recentChat.receiver_id
+        : recentChat.sender_id;
+
+      setChatTarget(userFriends.filter((data) => data.friend_id===recentChatTarget)[0]);
+      console.log(recentChat);
     }
   }, []);
 
+  // 친구 리스트에서 눌러서 열었을 때 채팅 스크롤 설정
   useEffect(() => {
-    // 현재 채팅 목록에서 receiverId 또는 senderId가 chatTarget과 일치하는 경우에만 스크롤 조절
-    const shouldAdjustScroll = myChat.some(data => data.receiverId === chatTarget || data.senderId === chatTarget);
-
+    // 현재 채팅 목록에서 receiver_id 또는 senderId가 chatTarget과 일치하는 경우에만 스크롤 조절
+    const shouldAdjustScroll = myChat.some(data => data.receiver_id === chatTarget.friend_id || data.sender_id === chatTarget.friend_id);
     if (shouldAdjustScroll) {
-      // 스크롤 아래로 이동
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // 현재 스크롤 높이
+      const currentScrollHeight = scrollRef.current.scrollHeight;
+      // 이전 스크롤 높이와 현재 스크롤 높이 비교
+      if (prevScrollHeight.current !== currentScrollHeight) {
+        // 스크롤 아래로 이동
+        scrollRef.current.scrollTop = currentScrollHeight;
+        // 이전 스크롤 높이 업데이트
+        prevScrollHeight.current = currentScrollHeight;
+      }
     }
+    
   }, [myChat, chatTarget]);
-  
-// 1. senderId가 내 아이디인 채팅을 DB에서 싹 가져온다.
-// 2. receiverId가 내 아이디인 채팅을 싹 가져온다.
-// 3. 메시지들을 시간순으로 정렬
-// 4. 반복문 돌려서 출력한다.
 
-  // 채팅
+  // 채팅 Box
   const ChatBox = ({action, content}) =>{
     return(
       <div className='chat-content-container'>
@@ -63,6 +69,26 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
       </div>
   )}
 
+  // 채팅 post 보내기
+  const handleChatSend = async () => {
+    if (!userData) {
+        alert('로그인 세션이 만료되었습니다.');
+        navigate('/login');
+        return;
+      }
+  
+    try {
+      await axios.post(`http://localhost:3001/chat/send`, {
+        senderId: userData.username,
+        receiverId: chatTarget.friend_id,
+        content: currentChat.content,
+      });
+    } catch (error) {
+      console.error('채팅 전송 오류:', error);
+    }
+  };
+  
+  // 채팅창 엔터누를 때
   const handleKeyDown = (e) => {
     // 엔터누를 때 + 공백방지
     if (e.key === 'Enter' && currentChat.content.trim() !== '') {
@@ -70,65 +96,81 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
       setCurrentChat({ 
         ...currentChat,
         content: '', 
-        date: getCurrentDateTime() 
       })
       setMyChat([...myChat, currentChat]);
-
-      // DB로 내 채팅데이터 보내기
-      //
+      handleChatSend();
+    } else if(!chatTarget.friend_id){
+      alert('채팅 상대를 선택해주세요.');
     }
   };
+  
+  // 채팅 리스트 최근 채팅순 정렬
+  const sortedFriends = [...new Set(myChat.map(data => (data.receiver_id === userData.username ? data.sender_id : data.receiver_id)))]
+  .map((friendId, i) => ({
+    friendId,
+    latestMessageTime: Math.max(
+      ...myChat
+        .filter(data => (data.receiver_id === userData.username && data.sender_id === friendId) || (data.sender_id === userData.username && data.receiver_id === friendId))
+        .map(data => new Date(data.created_at).getTime())
+    )
+  }))
+  .sort((a, b) => b.latestMessageTime - a.latestMessageTime);
 
   return (
     <>
-      <div className='chatModal'>
+       <div className='chatModal'>
           <div className='chat-list-container'>
             {/* 나와 관련한 채팅만 나오게 조건 걸어뒀는데, DB에서 받아올 때 거를거임 */}
-            {[...new Set(myChat.map(data => (data.receiverId === userData.nickname ? data.senderId : data.receiverId)))].map((friendId, i) => (
-              <div key={i} className='chat-list' onClick={() => { setChatTarget(friendId)}}>
-                <div className='chat-friend-icon'>
-                  {/* chat.senderId와 chat.receiverId 중에 내 id와 다른 id의 아이콘 출력 */}
-                  <img src={defaultIcon} alt='' />
-                </div>
-                <div className='chat-info'>
-                  <span className='chat-friend-nickname'>
-                    {/* 상대방 아이디 출력 : chat.senderId와 chat.receiverId 중에 내 id와 다른 아이디 출력 */}
-                    {friendId}
-                  </span>
-                  <span className='chat-friend-content'>
-                    {/* 최근 채팅 한줄만 출력 */}
-                    {myChat.filter(data => (data.receiverId === userData.nickname && data.senderId === friendId) || (data.senderId === userData.nickname && data.receiverId === friendId))
-                      .sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()[0]?.content}
-                  </span>
-                </div>
+            {sortedFriends
+            .map((friend, i) => (
+              <div key={i} className='chat-list' onClick={() => { 
+                setChatTarget(userFriends.filter((data) => data.friend_id===friend.friendId)[0]) }}>
+              <div className='chat-friend-icon'>
+               
+                {/* 채팅리스트 - 아이콘 */}
+                <img src={icons[userFriends.filter((data) => data.friend_id === friend.friendId)[0].current_icon]} alt='' />
               </div>
+              <div className='chat-info'>
+                <span className='chat-friend-nickname'>
+                  {/* 채팅리스트 - 닉네임 */}
+                  {userFriends.filter((data) => data.friend_id===friend.friendId)[0].nickname}
+                </span>
+                <span className='chat-friend-content'>
+                  {/* 채팅리스트 - 최근 채팅 한줄 */}
+                  {myChat.filter(data => (data.receiver_id === userData.username && data.sender_id === friend.friendId) || (data.sender_id === userData.username && data.receiver_id === friend.friendId))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()[0]?.content}
+                </span>
+              </div>
+            </div>
+
             ))}
           </div>
           <div className='chat-container'>
             <div className='chat-header'>
               <div className='chat-friend'>
                 <div className='chat-friend-icon'>
-                  {/* chat.senderId와 chat.receiverId중에 내 id와 다른 것의 아이콘 출력 */}
-                  <img src={defaultIcon} alt=''/>
+                  {/* 채팅 헤더 아이콘 */}
+                  <img src={icons[chatTarget.current_icon]} alt=''/>
                 </div>
+                {/* 채팅 헤더 닉네임 */}
                 <span className='chat-friend-nickname'>
-                  {/* chat.senderId와 chat.receiverId중에 내 id와 다른 것 출력 */}
-                  {chatTarget}
+                  {chatTarget.nickname}
                 </span>
+                {/* 최소화 버튼 */}
                 <button className='chat-closeBtn' onClick={onHide}>ㅡ</button>
               </div>
             </div>
             <div className='chat-content' ref={scrollRef}>
-              {/* chat.senderId가 내 id랑 같으면 채팅출력. 시간이 최근것부터 위에서*/}
               <div className='blank'/>
+              {/* 채팅 내용 */}
               {myChat.map((data, i)=>(
-                (data.senderId===userData.nickname||data.receiverId===userData.nickname) &&
-                (chatTarget ? (data.senderId === chatTarget || data.receiverId === chatTarget) : true) &&
-                <ChatBox key={i} action={data.senderId===userData.nickname?'send':'receive'} content={data.content}/>
+                (chatTarget ? (data.sender_id === chatTarget.friend_id || data.receiver_id === chatTarget.friend_id) : false) &&
+                <ChatBox key={i} action={data.sender_id===userData.username?'send':'receive'} content={data.content}/>
               ))}
             </div>
             <div className='chat-textarea-container'>
-              <textarea value={currentChat.content} onInput={(e) => setCurrentChat({ senderId: userData.nickname, receiverId: chatTarget, content: e.target.value })} 
+              {/* 채팅 입력공간 */}
+              <textarea value={currentChat.content} onInput={(e) => chatTarget.friend_id && setCurrentChat({ sender_id: userData.username, receiver_id: chatTarget.friend_id, content: e.target.value })} 
                         onKeyDown={handleKeyDown} placeholder='메시지를 입력하세요.'/>
             </div>
           </div>
