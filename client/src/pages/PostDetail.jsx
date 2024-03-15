@@ -6,6 +6,7 @@ import { useUser } from '../contexts/UserContext'; // 사용자 정보를 가져
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import formatDate from '../components/function/formatDate';
+import '../styles/Post.css'
 
 
 const PostDetail = () => {
@@ -13,7 +14,8 @@ const PostDetail = () => {
   const textarea = useRef(); // 댓글 입력창 참조
   const location = useLocation(); 
   const navigate = useNavigate();
-  const post = location.state?.post; 
+  const postData = location.state?.post; 
+  const [post, setPost] = useState(postData);
   // 댓글 입력창 크기 자동 조절 함수
   const handleResizeHeight = () => {
     textarea.current.style.height = 'auto';
@@ -37,6 +39,24 @@ const PostDetail = () => {
     content: '',
     date: ''
   });
+
+
+  // 조회수증가
+  useEffect(() => {
+    const view = post.views + 1;
+    const fetchData = async () => {
+      try {
+        await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+          views: view
+        });
+      } catch (error) {
+          console.error('조회수 수정 오류 발생:', error);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
 
   useEffect(() => {
     // TODO: DB에서 댓글 데이터 가져오기 및 상태 업데이트
@@ -66,7 +86,7 @@ const PostDetail = () => {
   const handleEditSave = async () => {
     
   try {
-    await axios.put(`http://localhost:3001/api/posts/${post?.post_id}`, {
+    await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
       title: editedTitle,
       content: editedContent,
     });
@@ -85,28 +105,27 @@ const PostDetail = () => {
   if (isEditing) {
   
     return (
-      <div className='postBox'>
-        <div className='post-header'>
-          <h2 className='post-title'>
-            <input
-              className="titleInput"
-              type='text'
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-            />
-          </h2>
+      <div className='writeBox'>
+        <div className='write-header'>
+          <h2 className='write-title'>글 수정</h2>
         </div>
-        <div className='post-body'>
-          <p className='post-content'>
-            <textarea
-              className="contentTextarea" 
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-            />
-          </p>
+        <div className='write-body'>
+          <input
+            type='text'
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            placeholder='제목을 입력해주세요.'
+          />
+          <textarea
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            placeholder='내용을 입력해주세요.'
+          />
         </div>
-        <div className='post-footer'>
-          <button className="saveButton" onClick={handleEditSave}>저장</button>
+        <div className='write-footer'>
+          <div className='btnBox'>
+            <button className="saveButton" onClick={handleEditSave}>저장</button>
+          </div>
         </div>
       </div>
     );
@@ -116,7 +135,7 @@ const PostDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('게시글을 삭제하시겠습니까?')) {
       try {
-        await axios.delete(`http://localhost:3001/api/posts/${post?.post_id}`);
+        await axios.delete(`http://localhost:3001/api/posts/${post?.id}`);
         alert('게시글이 삭제되었습니다.');
         navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
       } catch (error) {
@@ -126,6 +145,21 @@ const PostDetail = () => {
     }
   };
 
+  const handleClickLikes = () => {
+    const like = post.likes + 1;
+    setPost({...post, likes: like});
+    handleUpdateLikes(like);
+  }
+
+  const handleUpdateLikes = async (like) => {
+    try {
+      await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+        likes: like
+      });
+    } catch (error) {
+        console.error('좋아요 수정 오류 발생:', error);
+    }
+  };
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -141,7 +175,7 @@ const PostDetail = () => {
         <p className='post-content'>{post?.content}</p>
       </div>
       <div className='post-footer'>
-        <p className='post-like'>♡좋아요 {post?.like}</p>
+        <p className='post-like' onClick={handleClickLikes}>♡좋아요 {post?.likes}</p>
         <p className='post-comment'>댓글 {comment.filter(data => data.postId === post?.id).length}</p>
         <div style={{flexBasis: '100%', borderBottom: '1px rgba(255,255,255, 0.2) solid', marginBottom: '20px'}}></div>
         
