@@ -9,6 +9,17 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser'); 
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session); // 메모리에 세션 정보 저장을 위한 모듈 추가
+// (Icon 저장을 위한 서버사이드 스토리지)
+const multer = require('multer'); // 멀터 모듈을 불러옵니다.
+const path = require('path'); // path 모듈을 불러옵니다.
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // 이미지 파일이 저장될 서버 내 경로
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) // 파일 이름 설정
+  }
+});
 
 
   // [MYSQL-1] DB연결 초기설정
@@ -16,8 +27,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -53,6 +64,9 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   // [EJS] 미들웨어
   app.set('view engine', 'ejs');
 
+// 아이콘 저장 스토리지
+const upload = multer({ storage: storage });
+app.use('/uploads', express.static('uploads'));
 
 
 
@@ -192,41 +206,46 @@ app.get('/userData', (req, res) => {
   }
 });
 
-app.get('/userFriends', (req, res) => {
-  const username = req.session.username;
 
-  // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
-  const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
-  connection.query(selectQuery, [username], (error, results) => {
-    if (error) {
-      console.error('DB 조회 오류:', error);
-      return res.status(500).json({ success: false, error: 'user_friends를 조회할 수 없습니다.' });
+  app.get('/userFriends', (req, res) => {
+    if (!req.session.username) {
+      return res.status(401).json({ message: '로그인이 필요합니다.' });
     }
-
-    // 친구 목록의 프로필 메시지 조회
-    const friendIds = results.map(result => result.friend_id);
-    const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
-    connection.query(profileQuery, [friendIds], (error, profileResults) => {
+  
+    const username = req.session.username;
+  
+    // 유저 친구 정보 조회
+    const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
+    connection.query(selectQuery, [username], (error, friendResults) => {
       if (error) {
-        console.error('프로필 조회 오류:', error);
-        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
+        console.error('DB 조회 오류:', error);
+        return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
       }
-
-      // 프로필 메시지를 결과에 추가
-      for (const result of results) {
-        const profile = profileResults.find(profile => profile.username === result.friend_id);
-        if (profile) {
-          result.profile_message = profile.profile_message;
-          result.nickname = profile.nickname;
-          result.current_icon = profile.current_icon;
+  
+      // 친구 목록의 프로필 메시지 조회
+      const friendIds = friendResults.map(result => result.friend_id); // 여기가 수정된 부분입니다.
+      const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
+      connection.query(profileQuery, [friendIds], (error, profileResults) => {
+        if (error) {
+          console.error('프로필 조회 오류:', error);
+          return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
         }
-      }
-
-      // 최종 결과 반환
-      res.json(results);
+  
+        // 프로필 메시지를 결과에 추가
+        const resultsWithProfile = friendResults.map(friendResult => {
+          const profile = profileResults.find(profile => profile.username === friendResult.friend_id);
+          return {
+            ...friendResult,
+            profile_message: profile ? profile.profile_message : null,
+            nickname: profile ? profile.nickname : null,
+            current_icon: profile ? profile.current_icon : null,
+          };
+        });
+  
+        res.json(resultsWithProfile);
+      });
     });
   });
-});
 
 app.get('/Users/Nickname', (req, res) => {
   // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
@@ -563,6 +582,223 @@ app.put('/icon/set', (req, res) => {
     res.json(results);
   });
 });
+
+// Admin 아이콘 업로드 API
+app.post('/upload-icon', upload.single('iconFile'), (req, res) => {
+  const { iconName, iconPrice } = req.body;
+  const iconFile = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+  try {
+    // 데이터베이스에 아이콘 정보 저장
+    connection.query('INSERT INTO icon_shop (IconName, IconFile, IconPrice) VALUES (?, ?, ?)', [iconName, iconFile, iconPrice], (error, results, fields) => {
+      if (error) {
+        console.error('데이터 베이스 에러입니다!:', error);
+        res.status(500).send('운영자님! DB에 아이콘을 업로드 하지 못했어요.');
+      } else {
+        console.log('Inserted Icon ID:', results.insertId); // 삽입된 아이콘의 ID 출력
+        res.send('운영자님! 아이콘을 성공적으로 등록하였읍니다.');
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// 아이콘 스토어 LIST
+app.get('/api/icons', (req, res) => {
+  try {
+    // 데이터베이스에서 아이콘 목록을 조회
+    connection.query('SELECT * FROM icon_shop', (error, results, fields) => {
+      if (error) {
+        console.error('Icon_shop테이블 데이터 에러:', error);
+        res.status(500).send('아이콘샵의 데이터베이스를 잃지 못했읍니당.');
+      } else {
+        res.json(results); // 조회된 아이콘 목록을 JSON 형태로 응답
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// 아이콘스토어 구매요청
+app.post('/api/purchase', (req, res) => {
+  // 요청 본문에서 userId와 iconId 추출
+  const { userId, iconId } = req.body;
+
+  // 데이터베이스 트랜잭션!!! 구문.
+  connection.beginTransaction(err => {
+    // 트랜잭션 시작 시 오류가 발생하면 클라이언트에 500 에러 응답
+    if (err) {
+      console.error('트랜잭션 시스템 오류:', err);
+      return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+
+    // 사용자의 포인트를 조회하는 쿼리 실행
+    connection.query('SELECT point FROM user WHERE id = ?', [userId], (error, results) => {
+      // 쿼리 실행 중 오류 발생 또는 사용자가 존재하지 않으면 롤백 후 404 에러 응답
+      if (error || results.length === 0) {
+        console.error('유저 포인트 패치 오류:', error);
+        return connection.rollback(() => {
+          return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        });
+      }
+
+      // 조회된 사용자 포인트
+      const userPoint = results[0].point;
+
+      // 아이콘의 가격과 IconFile을 동시에 조회하는 쿼리 실행
+      connection.query('SELECT IconPrice, IconFile FROM icon_shop WHERE IconID = ?', [iconId], (error, results) => {
+        // 쿼리 실행 중 오류 발생 또는 아이콘 존재하지 않으면 롤백 후 404 에러 응답
+        if (error || results.length === 0) {
+          console.error('아이콘 상점의 아이콘 패치 오류:', error);
+          return connection.rollback(() => {
+            return res.status(404).json({ success: false, message: '아이콘을 찾을 수 없습니다.' });
+          });
+        }
+
+        // 조회된 아이콘 가격
+        const iconPrice = results[0].IconPrice;
+        // 아이콘 파일 URL
+        const iconFileURL = results[0].IconFile;
+
+        // 사용자 포인트가 아이콘 가격보다 적을 경우 롤백 후 400 에러 응답
+        if (userPoint < iconPrice) {
+          return connection.rollback(() => {
+            return res.status(400).json({ success: false, message: '포인트가 부족합니다.' });
+          });
+        }
+
+        // 구매 후 남은 포인트 계산
+        const newPoint = userPoint - iconPrice;
+
+        // 사용자 포인트 업데이트 및 구매 정보 추가 쿼리 실행
+        connection.query('UPDATE user SET point = ? WHERE id = ?', [newPoint, userId], (error, results) => {
+          if (error) {
+            // 쿼리 실행 중 오류 발생 시 롤백 후 500 에러 응답
+            console.error('유저 포인트 업데이트 오류:', error);
+            return connection.rollback(() => {
+              return res.status(500).json({ success: false, message: '포인트 업데이트 중 오류가 발생했습니다.' });
+            });
+          }
+
+          // 구매 정보에 사용될 현재 날짜와 시간
+          const acquisitionDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+          // 구매 정보를 user_icons 테이블에 추가
+          connection.query('INSERT INTO user_icons (UserID, IconID, isCurrent, acquisitionDate) VALUES (?, ?, 0, ?)',
+            [userId, iconId, acquisitionDate], (error, results) => {
+              if (error) {
+                // 아이콘 구매 정보 저장 중 오류 발생 시 롤백 후 500 에러 응답
+                console.error('아이콘 구매 정보 저장 오류:', error);
+                return connection.rollback(() => {
+                  return res.status(500).json({ success: false, message: '아이콘 구매 정보 저장 중 오류가 발생했습니다.' });
+                });
+              }
+
+              // 트랜잭션 커밋
+              connection.commit(err => {
+                if (err) {
+                  console.error('트랜잭션 커밋 오류:', err);
+                  return connection.rollback(() => {
+                    return res.status(500).json({ success: false, message: '트랜잭션 커밋 중 오류가 발생했습니다.' });
+                  });
+                }
+
+                // 구매 성공 응답, 아이콘 파일 URL 포함
+                console.log('아이콘 구매 성공:', results);
+                res.json({ success: true, message: '아이콘 구매가 완료되었습니다.', iconFileURL: iconFileURL });
+              });
+            });
+        });
+      });
+    });
+  });
+});
+
+
+
+
+// 사용자의 아이콘 목록 조회 API
+app.get('/api/user-icons/:userId', (req, res) => {
+  // URL 경로로부터 userId를 추출하기.
+  const { userId } = req.params;
+
+  // user_icons 테이블과 icon_shop 테이블을 조인하여 사용자가 보유한 아이콘과 해당 URL 정보를 조회
+  const query = `
+    SELECT user_icons.UserIconID, 
+    user_icons.UserID, user_icons.IconID, 
+    user_icons.isCurrent, 
+    user_icons.AcquisitionDate, 
+    icon_shop.IconFile AS IconURL FROM user_icons JOIN icon_shop ON user_icons.IconID = icon_shop.IconID
+    WHERE user_icons.UserID = ?
+  `;
+
+  connection.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching user icons:", error);
+      return res.status(500).send({ success: false, message: "Error fetching user icons" });
+    }
+
+    res.send(results);
+  });
+});
+
+
+
+// 현재 아이콘 선택 함수.
+app.post('/api/user-icons/set-current/:userId', (req, res) => {
+  const userId = req.params.userId; // URL에서 사용자 ID를 가져옵니다.
+  const { iconId } = req.body; // 요청 본문에서 아이콘 ID를 가져옵니다.
+
+  // 먼저 모든 아이콘의 isCurrent를 false로 설정합니다.
+  const resetQuery = 'UPDATE user_icons SET isCurrent = false WHERE UserID = ?';
+  connection.query(resetQuery, [userId], (error, results) => {
+    if (error) {
+      console.error("Error resetting user icons:", error);
+      return res.status(500).send("Failed to reset user icons.");
+    }
+
+    // 그 다음 선택된 아이콘의 isCurrent를 true로 설정합니다.
+    const updateQuery = 'UPDATE user_icons SET isCurrent = true WHERE UserID = ? AND IconID = ?';
+    connection.query(updateQuery, [userId, iconId], (error, results) => {
+      if (error) {
+        console.error("Error setting current icon:", error);
+        return res.status(500).send("Failed to set current icon.");
+      }
+
+      if (results.affectedRows > 0) {
+        res.send("Current icon updated successfully.");
+      } else {
+        // 이 경우는 일반적으로 발생하지 않지만, 만약 업데이트할 아이콘이 없으면 클라이언트에게 알립니다.
+        res.status(404).send("Icon not found.");
+      }
+    });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // <초기세팅> 서버실행 및 서버 종료(엔드포인트 코드이므로 항상 맨 마지막에 배치하기.)

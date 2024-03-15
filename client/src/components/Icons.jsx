@@ -1,4 +1,4 @@
-// /* eslint-disable */
+ /* eslint-disable */
 import React, { useEffect, useState } from 'react';
 import { useIcon } from '../contexts/IconContext';
 import "../styles/App.css";
@@ -11,14 +11,14 @@ const Icons = () => {
   const [filteredIcons, setFilteredIcons] = useState([]);
 
   useEffect(() => {
-    const filteredIcons = userData.owned_icon.map((number) => icons[number]);
-    setFilteredIcons(filteredIcons);
+    // userData.owned_icon이 존재하면 실행
+    if (userData.owned_icon && icons.length > 0) {
+      const filteredIcons = userData.owned_icon.map((number) => icons[number]);
+      setFilteredIcons(filteredIcons);
+    }
   }, [userData.owned_icon, icons]);
 
-  // const handleOnClick = (index) => {
-  //   setUserData({...userData, current_icon: index});
-  //   handleIconSet();
-  // }
+
   const handleOnClick = (icon) => {
     const index = icons.findIndex((item) => item === icon);
     setUserData({ ...userData, current_icon: index });
