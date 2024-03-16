@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
-
+import { useIcon } from "../contexts/IconContext";
 import '../styles/Store.css';
 
+
 function Store() {
-  const { userData } = useUser(); // 사용자 데이터
-  const [icons, setIcons] = useState([]); // 
+  const { userData,refreshUserData } = useUser(); // 사용자 데이터
+  const [icons, setIcons] = useState([]);
+  const { fetchUserIcons } = useIcon();
 
   // 아이콘 목록을 불러오는 함수
   const fetchIcons = async () => {
@@ -34,13 +36,15 @@ function Store() {
       });
       if (response.data.success) {
         alert('아이콘 구매 완료. 77ㅓ억');
+        fetchUserIcons();
+        refreshUserData();
         // 구매 후 포인트 갱신 등의 추가 작업이 필요한 경우 여기에 구현
       } else {
         alert('포인트가 부족합니다.');
       }
     } catch (error) {
       console.error("아이콘 구매에 실패했습니다.", error);
-      alert('구매 과정에서 오류가 발생했습니다.');
+      alert('포인트가 부족합니다.');
     }
   };
 
@@ -61,7 +65,7 @@ function Store() {
           <p>로딩 중...</p>
         ) : (
           icons.map((icon) => (
-            <div key={icon.id} className='icon-item'>
+            <div key={icon.id} className='icon-item'> {/* key 추가 */}
               <img src={icon.iconFile} alt={icon.IconName} style={{ width: '100px', height: '100px' }} />
               <p>{icon.IconName}</p>
               <p>{Math.round(icon.iconPrice)} 포인트</p>

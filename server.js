@@ -94,15 +94,14 @@ app.post('/signup', (req, res) => {
 
   // 기본 보유 아이콘목록
   const default_ownedIcon = [0];
-  const default_ownedIconString = JSON.stringify(default_ownedIcon);
 
   // MySQL 회원가입 쿼리
   const query = `
-  INSERT INTO user (username, password, nickname, address, authority, owned_icon)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO user (username, password, nickname, address, authority)
+  VALUES (?, ?, ?, ?, ?)
 `;
   connection.query(query, 
-    [username, password, nickname, addressString, authority, default_ownedIconString], // 여기에서 address 대신 addressString 사용
+    [username, password, nickname, addressString, authority], // 여기에서 address 대신 addressString 사용
     (error, results) => {
 
 
@@ -625,92 +624,80 @@ app.get('/api/icons', (req, res) => {
 
 // 아이콘스토어 구매요청
 app.post('/api/purchase', (req, res) => {
-  // 요청 본문에서 userId와 iconId 추출
   const { userId, iconId } = req.body;
 
-  // 데이터베이스 트랜잭션!!! 구문.
   connection.beginTransaction(err => {
-    // 트랜잭션 시작 시 오류가 발생하면 클라이언트에 500 에러 응답
     if (err) {
-      console.error('트랜잭션 시스템 오류:', err);
+      console.error('트랜잭션 시작 오류:', err);
       return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
     }
 
-    // 사용자의 포인트를 조회하는 쿼리 실행
     connection.query('SELECT point FROM user WHERE id = ?', [userId], (error, results) => {
-      // 쿼리 실행 중 오류 발생 또는 사용자가 존재하지 않으면 롤백 후 404 에러 응답
       if (error || results.length === 0) {
-        console.error('유저 포인트 패치 오류:', error);
+        console.error('유저 포인트 조회 오류:', error);
         return connection.rollback(() => {
           return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
         });
       }
 
-      // 조회된 사용자 포인트
       const userPoint = results[0].point;
-
-      // 아이콘의 가격과 IconFile을 동시에 조회하는 쿼리 실행
       connection.query('SELECT IconPrice, IconFile FROM icon_shop WHERE IconID = ?', [iconId], (error, results) => {
-        // 쿼리 실행 중 오류 발생 또는 아이콘 존재하지 않으면 롤백 후 404 에러 응답
         if (error || results.length === 0) {
-          console.error('아이콘 상점의 아이콘 패치 오류:', error);
+          console.error('아이콘 조회 오류:', error);
           return connection.rollback(() => {
             return res.status(404).json({ success: false, message: '아이콘을 찾을 수 없습니다.' });
           });
         }
 
-        // 조회된 아이콘 가격
         const iconPrice = results[0].IconPrice;
-        // 아이콘 파일 URL
-        const iconFileURL = results[0].IconFile;
+        const iconFileURL = results[0].IconFile; // 여기서 IconFile URL을 추출
 
-        // 사용자 포인트가 아이콘 가격보다 적을 경우 롤백 후 400 에러 응답
         if (userPoint < iconPrice) {
           return connection.rollback(() => {
             return res.status(400).json({ success: false, message: '포인트가 부족합니다.' });
           });
         }
 
-        // 구매 후 남은 포인트 계산
         const newPoint = userPoint - iconPrice;
-
-        // 사용자 포인트 업데이트 및 구매 정보 추가 쿼리 실행
         connection.query('UPDATE user SET point = ? WHERE id = ?', [newPoint, userId], (error, results) => {
           if (error) {
-            // 쿼리 실행 중 오류 발생 시 롤백 후 500 에러 응답
-            console.error('유저 포인트 업데이트 오류:', error);
+            console.error('포인트 업데이트 오류:', error);
             return connection.rollback(() => {
               return res.status(500).json({ success: false, message: '포인트 업데이트 중 오류가 발생했습니다.' });
             });
           }
 
-          // 구매 정보에 사용될 현재 날짜와 시간
-          const acquisitionDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-          // 구매 정보를 user_icons 테이블에 추가
-          connection.query('INSERT INTO user_icons (UserID, IconID, isCurrent, acquisitionDate) VALUES (?, ?, 0, ?)',
-            [userId, iconId, acquisitionDate], (error, results) => {
-              if (error) {
-                // 아이콘 구매 정보 저장 중 오류 발생 시 롤백 후 500 에러 응답
-                console.error('아이콘 구매 정보 저장 오류:', error);
-                return connection.rollback(() => {
-                  return res.status(500).json({ success: false, message: '아이콘 구매 정보 저장 중 오류가 발생했습니다.' });
-                });
-              }
+          connection.query('UPDATE user_icons SET isCurrent = 0 WHERE UserID = ?', [userId], (error, results) => {
+            if (error) {
+              console.error('isCurrent 업데이트 오류:', error);
+              return connection.rollback(() => {
+                return res.status(500).json({ success: false, message: 'isCurrent 업데이트 중 오류가 발생했습니다.' });
+              });
+            }
 
-              // 트랜잭션 커밋
-              connection.commit(err => {
-                if (err) {
-                  console.error('트랜잭션 커밋 오류:', err);
+            const acquisitionDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            connection.query('INSERT INTO user_icons (UserID, IconID, isCurrent, acquisitionDate) VALUES (?, ?, 1, ?)',
+              [userId, iconId, acquisitionDate], (error, results) => {
+                if (error) {
+                  console.error('아이콘 구매 정보 추가 오류:', error);
                   return connection.rollback(() => {
-                    return res.status(500).json({ success: false, message: '트랜잭션 커밋 중 오류가 발생했습니다.' });
+                    return res.status(500).json({ success: false, message: '아이콘 구매 정보 추가 중 오류가 발생했습니다.' });
                   });
                 }
 
-                // 구매 성공 응답, 아이콘 파일 URL 포함
-                console.log('아이콘 구매 성공:', results);
-                res.json({ success: true, message: '아이콘 구매가 완료되었습니다.', iconFileURL: iconFileURL });
+                connection.commit(err => {
+                  if (err) {
+                    console.error('트랜잭션 커밋 오류:', err);
+                    return connection.rollback(() => {
+                      return res.status(500).json({ success: false, message: '트랜잭션 커밋 중 오류가 발생했습니다.' });
+                    });
+                  }
+
+                  // 구매 성공 응답, 이전에 추출한 iconFileURL을 사용하여 응답
+                  res.json({ success: true, message: '아이콘 구매가 완료되었습니다.', iconFileURL: iconFileURL });
+                });
               });
-            });
+          });
         });
       });
     });
