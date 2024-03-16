@@ -65,7 +65,7 @@ function Store() {
           <p>로딩 중...</p>
         ) : (
           icons.map((icon) => (
-            <div key={icon.id} className='icon-item'>
+            <div key={icon.id} className='icon-item'> {/* key 추가 */}
               <img src={icon.iconFile} alt={icon.IconName} style={{ width: '100px', height: '100px' }} />
               <p>{icon.IconName}</p>
               <p>{Math.round(icon.iconPrice)} 포인트</p>
