@@ -12,10 +12,11 @@ export const UserProvider = ({ children }) => {
   const refreshUserData = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:3001/userData', { withCredentials: true });
-      if (response.data && response.data.userData) {
-        setUserData(response.data.userData);
+      // 서버 응답에서 user 객체를 정확히 참조하도록 수정
+      if (response.data && response.data.user) { // 변경된 부분: userData -> user
+        setUserData(response.data.user); // 사용자 데이터를 state에 저장
       } else {
-        console.log('아이콘 구매 성공후 유저데이터 새로고침.');
+        console.log('유저 데이터를 불러오는 데 실패했습니다.');
       }
     } catch (error) {
       console.error('사용자 정보 새로고침 중 오류가 발생했습니다:', error);
