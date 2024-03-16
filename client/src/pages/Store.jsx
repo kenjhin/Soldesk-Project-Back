@@ -36,8 +36,8 @@ function Store() {
       });
       if (response.data.success) {
         alert('아이콘 구매 완료. 77ㅓ억');
+        await refreshUserData();
         fetchUserIcons();
-        refreshUserData();
         // 구매 후 포인트 갱신 등의 추가 작업이 필요한 경우 여기에 구현
       } else {
         alert('포인트가 부족합니다.');
@@ -58,8 +58,12 @@ function Store() {
           </Link>
         </div>
       )}
-    
-      <p>아이콘 샵</p>
+      <div className='My-Point'>
+        <h1>내 포인트</h1>{userData ? `${userData.point} 포인트` : '포인트를 불러오는 중...'}
+    </div>
+    <div className='icon-shop-banner'>
+      <p>아이콘스토어</p>
+    </div>
       <div className='icons-list'>
         {icons.length === 0 ? (
           <p>로딩 중...</p>
@@ -69,7 +73,7 @@ function Store() {
               <img src={icon.iconFile} alt={icon.IconName} style={{ width: '100px', height: '100px' }} />
               <p>{icon.IconName}</p>
               <p>{Math.round(icon.iconPrice)} 포인트</p>
-              <button onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
+              <button className="button-buy" onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
             </div>
           ))
         )}
