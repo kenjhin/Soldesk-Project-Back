@@ -70,7 +70,7 @@ const Messenger = () => {
     };
 
     fetchUserFriends();
-  }, [chatTarget]); // 친구 요청받거나 채팅바뀌거나할때마다 
+  }, [chatTarget, friendRequest]); // 친구 요청받거나 채팅바뀌거나할때마다 
 
   // myChat 받아오기
   useEffect(() => {
@@ -150,7 +150,10 @@ const Messenger = () => {
           <img src={addPerson} alt=''/>
         </button>
       </div>
-      <FriendRequests friendRequest={friendRequest}/>
+      <FriendRequests 
+        friendRequest={friendRequest}
+        setFriendRequest={setFriendRequest}
+      />
       {addFriendModalShow && 
       <AddFriendModal 
         show={addFriendModalShow} 
