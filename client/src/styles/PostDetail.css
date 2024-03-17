@@ -1,0 +1,19 @@
+.comment-edit {
+    margin-right: 8px;
+    margin-left: 15px;
+  }
+  
+  .comment-delete {
+    margin-bottom: 16px;
+  }
+
+ 
+.comment-writer {
+    color: #6a7744; 
+    font-weight: bold;
+  }
+  
+  .comment-date {
+    color: #757575; 
+    font-size: 0.85rem; 
+  }
