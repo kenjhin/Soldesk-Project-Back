@@ -9,6 +9,17 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser'); 
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session); // 메모리에 세션 정보 저장을 위한 모듈 추가
+// (Icon 저장을 위한 서버사이드 스토리지)
+const multer = require('multer'); // 멀터 모듈을 불러옵니다.
+const path = require('path'); // path 모듈을 불러옵니다.
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // 이미지 파일이 저장될 서버 내 경로
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) // 파일 이름 설정
+  }
+});
 
 
   // [MYSQL-1] DB연결 초기설정
@@ -53,6 +64,9 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   // [EJS] 미들웨어
   app.set('view engine', 'ejs');
 
+// 아이콘 저장 스토리지
+const upload = multer({ storage: storage });
+app.use('/uploads', express.static('uploads'));
 
 
 
@@ -71,23 +85,23 @@ app.get('/',  (req,res) => {
 // <POST> 회원가입 API
 app.post('/signup', (req, res) => {
   // 요청 본문에서 데이터 추출
-  const { username, password, confirmPassword, nickname, address, authority, icon } = req.body;
+  const { username, password, confirmPassword, nickname, address, authority } = req.body;
   const addressString = JSON.stringify(address);
   // 입력값 유효성 검사
   if (!username || !password || !confirmPassword || password !== confirmPassword) {
     return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
   }
 
-    // MySQL 회원가입 쿼리
+  // 기본 보유 아이콘목록
+  const default_ownedIcon = [0];
+
+  // MySQL 회원가입 쿼리
   const query = `
-  INSERT INTO user (username, password, nickname, address, authority, current_icon)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO user (username, password, nickname, address, authority)
+  VALUES (?, ?, ?, ?, ?)
 `;
-
-  // MySQL 쿼리 실행, addressString을 쿼리 파라미터로 전달
-
   connection.query(query, 
-    [username, password, nickname, addressString, authority, icon], // 여기에서 address 대신 addressString 사용
+    [username, password, nickname, addressString, authority], // 여기에서 address 대신 addressString 사용
     (error, results) => {
 
 
@@ -191,6 +205,7 @@ app.get('/userData', (req, res) => {
   }
 });
 
+
 app.get('/userFriends', async (req, res) => {
   if (!req.session.username) {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
@@ -227,35 +242,14 @@ app.get('/userFriends', async (req, res) => {
 
 app.get('/users/nickname', (req, res) => {
   // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
-  const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
-  connection.query(selectQuery, [username], (error, results) => {
+  const selectQuery = 'SELECT nickname FROM user';
+  connection.query(selectQuery, (error, results) => {
     if (error) {
       console.error('DB 조회 오류:', error);
-      return res.status(500).json({ success: false, error: 'user_friends를 조회할 수 없습니다.' });
+      return res.status(500).json({ success: false, error: 'Users.Nickname을 조회할 수 없습니다.' });
     }
 
-    // 친구 목록의 프로필 메시지 조회
-    const friendIds = results.map(result => result.friend_id);
-    const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
-    connection.query(profileQuery, [friendIds], (error, profileResults) => {
-      if (error) {
-        console.error('프로필 조회 오류:', error);
-        return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
-      }
-
-      // 프로필 메시지를 결과에 추가
-      for (const result of results) {
-        const profile = profileResults.find(profile => profile.username === result.friend_id);
-        if (profile) {
-          result.profile_message = profile.profile_message;
-          result.nickname = profile.nickname;
-          result.current_icon = profile.current_icon;
-        }
-      }
-
-      // 최종 결과 반환 
-      res.json(results);
-    });
+    res.json(results);
   });
 });
 
@@ -305,7 +299,7 @@ app.post('/api/posts', (req, res) => {
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT id, title, user_id, content, board_id, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
+  const query = 'SELECT id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
@@ -332,7 +326,7 @@ app.get('/api/posts/likes', (req, res) => {
 // <PUT> 게시판 수정 API
 app.put('/api/posts/:id', (req, res) => {
   const { id } = req.params; // URL에서 게시물 ID 추출
-  const { title, content } = req.body; // 요청 본문에서 제목과 내용 추출
+  const { title, content, likes, views } = req.body; // 수정시 본문에서 제목과 내용 추출 / 좋아요 눌렀을 때 / 게시물열릴때
 
   // 게시물이 존재하는지 확인하는 쿼리
   const checkQuery = 'SELECT * FROM post WHERE id = ?';
@@ -341,26 +335,63 @@ app.put('/api/posts/:id', (req, res) => {
       console.error('게시물-DB 체크 오류:', checkError);
       return res.status(500).json({ message: '게시물 찾기에 실패했음.' });
     }
-
+    
     if (checkResults.length === 0) {
       return res.status(404).json({ message: '게시물이 존재하지 않습니다.' });
     }
+    
+    // 좋아요눌렀으면
+    if(likes){
+      const updateQuery = 'UPDATE post SET likes = ? WHERE id = ?';
+      connection.query(updateQuery, [likes, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('좋아요 수정 에러:', updateError);
+          return res.status(500).json({ message: '좋아요 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+        res.json();
+      });
+    }
 
-    // 게시물 업데이트 쿼리
-    const updateQuery = 'UPDATE post SET title = ?, content = ? WHERE id = ?';
-    connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
-      if (updateError) {
-        console.error('게시물 수정 에러:', updateError);
-        return res.status(500).json({ message: '게시물 수정에 실패 했습니다.' });
-      }
+    // 게시물 새로고침될때
+    if(views){
+      const updateQuery = 'UPDATE post SET views = ? WHERE id = ?';
+      connection.query(updateQuery, [views, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('조회수 수정 에러:', updateError);
+          return res.status(500).json({ message: '조회수 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+        res.json();
+      });
+    }
 
-      if (updateResults.affectedRows === 0) {
-        // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
-        return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
-      }
-
-      res.json({ message: '게시물이 성공적으로 수정되었습니다.' });
-    });
+    // 수정경로로 들어갔으면
+    if(title){
+      // 게시물 업데이트 쿼리
+      const updateQuery = 'UPDATE post SET title = ?, content = ? WHERE id = ?';
+      connection.query(updateQuery, [title, content, id], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('게시물 수정 에러:', updateError);
+          return res.status(500).json({ message: '게시물 수정에 실패 했습니다.' });
+        }
+        
+        if (updateResults.affectedRows === 0) {
+          // 이 경우는 실제로 발생하지 않을 것이지만, 쿼리가 실행되었으나 업데이트되지 않은 경우를 처리
+          return res.status(404).json({ message: '게시물이 업데이트되지 않았습니다.' });
+        }
+  
+        res.json({ message: '게시물이 성공적으로 수정되었습니다.' });
+      });
+    }
   });
 });
 
@@ -388,75 +419,6 @@ app.delete('/api/posts/:id', (req, res) => {
   });
 });
 
-// 댓글 목록 불러오기
-app.get('/api/posts/:postId/comments', (req, res) => {
-  const { postId } = req.params;
-
-  const query = 'SELECT * FROM comment WHERE post_id = ?';
-  connection.query(query, [postId], (error, results) => {
-      if (error) {
-          console.error('댓글 불러오기 실패 :', error);
-          return res.status(500).json({ message: '댓글 불러오기 실패 ' });
-      }
-      res.json(results);
-  });
-});
-
-// 댓글 추가
-app.post('/api/posts/:postId/comments', (req, res) => {
-  const { postId } = req.params;
-  const { writer, content, board_id } = req.body;
-
-  const query = 'INSERT INTO comment (post_id, writer, content, board_id) VALUES (?, ?, ?, ?)';
-  connection.query(query, [postId, writer, content, board_id], (error, results) => { 
-      if (error) {
-          console.error('댓글 추가 중 에러:', error);
-          return res.status(500).json({ message: '댓글 추가 실패' });
-      }
-      res.status(201).json({ message: '댓글 추가 성공', commentId: results.insertId });
-  }); 
-});
-
-// 댓글 삭제하기
-app.delete('/api/comments/:commentId', (req, res) => {
-  
-  const { commentId } = req.params;
-  
-  const query = 'DELETE FROM comment WHERE comment_id = ?';
-  connection.query(query, [commentId], (error, results) => {
-    if (error) {
-      console.error("댓글 삭제 중 오류 발생:", error);
-      res.status(500).json({ message: "댓글 삭제에 실패했습니다." });
-    } else if (results.affectedRows === 0) {
-      res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
-    } else {
-      res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
-    }
-  });
-});
-
-// 댓글 수정
-app.put('/api/comments/:commentId', (req, res) => {
-  const { commentId } = req.params;
-  const { content } = req.body;
-
-  if (!content) {
-    return res.status(400).json({ message: "댓글 내용을 입력해주세요." });
-  }
-
-  const query = 'UPDATE comment SET content = ? WHERE comment_id = ?';
-  connection.query(query, [content, commentId], (error, results) => {
-    if (error) {
-      console.error("댓글 수정 중 오류 발생:", error);
-      return res.status(500).json({ message: "댓글 수정에 실패했습니다." });
-    } else if (results.affectedRows === 0) {
-      return res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
-    } else {
-      return res.status(200).json({ message: "댓글이 성공적으로 수정되었습니다." });
-    }
-  });
-});
-
 
 // 채팅 가져오기 GET
 app.get('/chatData', (req, res) => {
@@ -476,15 +438,14 @@ app.get('/chatData', (req, res) => {
 // 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
-  // console.log([senderId, receiverId, content])
+
 
   const userQuery = 'SELECT username FROM user WHERE username = ?';
   connection.query(userQuery, [receiverId], (error, results) => {
     if (error || results.length === 0) {
-      console.error('User fetch error:', error);
-      return res.status(500).json({ message: 'User fetch error' });
+      console.error('(Chat)User fetch error:', error);
+      return res.status(500).json({ message: '(Chat)User fetch error' });
     }
-    // console.log(`chat send : ${results}`);
 
     // 채팅 Insert Query
     const insertQuery = 'INSERT INTO chat (sender_id, receiver_id, content) VALUES (?, ?, ?)';
@@ -503,10 +464,18 @@ app.post('/chat/send', (req, res) => {
 app.get('/friendRequest/receive', (req, res) => {
   const username = req.session.username;
 
+  // const selectQuery = `
+  //   SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname 
+  //   FROM friend_requests fr 
+  //   INNER JOIN user u ON fr.sender_id = u.username 
+  //   WHERE fr.receiver_id = ? AND fr.status = 'awaiting'
+  // `;
   const selectQuery = `
-    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname 
+    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname, ui.IconId, ics.IconFile AS iconURL
     FROM friend_requests fr 
     INNER JOIN user u ON fr.sender_id = u.username 
+    LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.IsCurrent = 1
+    LEFT JOIN icon_shop ics ON ui.IconID = ics.IconID
     WHERE fr.receiver_id = ? AND fr.status = 'awaiting'
   `;
   connection.query(selectQuery, [username], (error, results) => {
@@ -623,7 +592,6 @@ app.put('/friendRequest/reject', (req, res) => {
 // 아이콘 Update
 app.put('/icon/set', (req, res) => {
   const { currentIcon, username } = req.body;
-  console.log([currentIcon, username]);
 
   const updateQuery = 'UPDATE user SET current_icon = ? WHERE username = ?';
   connection.query(updateQuery, [currentIcon, username], (updateError, results) => {
@@ -637,14 +605,219 @@ app.put('/icon/set', (req, res) => {
   });
 });
 
+// Admin 아이콘 업로드 API
+app.post('/upload-icon', upload.single('iconFile'), (req, res) => {
+  const { iconName, iconPrice } = req.body;
+  const iconFile = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+  try {
+    // 데이터베이스에 아이콘 정보 저장
+    connection.query('INSERT INTO icon_shop (IconName, IconFile, IconPrice) VALUES (?, ?, ?)', [iconName, iconFile, iconPrice], (error, results, fields) => {
+      if (error) {
+        console.error('데이터 베이스 에러입니다!:', error);
+        res.status(500).send('운영자님! DB에 아이콘을 업로드 하지 못했어요.');
+      } else {
+        console.log('Inserted Icon ID:', results.insertId); // 삽입된 아이콘의 ID 출력
+        res.send('운영자님! 아이콘을 성공적으로 등록하였읍니다.');
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// 아이콘 스토어 LIST
+app.get('/api/icons', (req, res) => {
+  try {
+    // 데이터베이스에서 아이콘 목록을 조회
+    connection.query('SELECT * FROM icon_shop', (error, results, fields) => {
+      if (error) {
+        console.error('Icon_shop테이블 데이터 에러:', error);
+        res.status(500).send('아이콘샵의 데이터베이스를 잃지 못했읍니당.');
+      } else {
+        res.json(results); // 조회된 아이콘 목록을 JSON 형태로 응답
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// 아이콘스토어 구매요청
+app.post('/api/purchase', (req, res) => {
+  const { userId, iconId } = req.body;
+
+  connection.beginTransaction(err => {
+    if (err) {
+      console.error('트랜잭션 시작 오류:', err);
+      return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+
+    connection.query('SELECT point FROM user WHERE id = ?', [userId], (error, results) => {
+      if (error || results.length === 0) {
+        console.error('유저 포인트 조회 오류:', error);
+        return connection.rollback(() => {
+          return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        });
+      }
+
+      const userPoint = results[0].point;
+      connection.query('SELECT IconPrice, IconFile FROM icon_shop WHERE IconID = ?', [iconId], (error, results) => {
+        if (error || results.length === 0) {
+          console.error('아이콘 조회 오류:', error);
+          return connection.rollback(() => {
+            return res.status(404).json({ success: false, message: '아이콘을 찾을 수 없습니다.' });
+          });
+        }
+
+        const iconPrice = results[0].IconPrice;
+        const iconFileURL = results[0].IconFile; // 여기서 IconFile URL을 추출
+
+        if (userPoint < iconPrice) {
+          return connection.rollback(() => {
+            return res.status(400).json({ success: false, message: '포인트가 부족합니다.' });
+          });
+        }
+
+        const newPoint = userPoint - iconPrice;
+        connection.query('UPDATE user SET point = ? WHERE id = ?', [newPoint, userId], (error, results) => {
+          if (error) {
+            console.error('포인트 업데이트 오류:', error);
+            return connection.rollback(() => {
+              return res.status(500).json({ success: false, message: '포인트 업데이트 중 오류가 발생했습니다.' });
+            });
+          }
+
+          connection.query('UPDATE user_icons SET isCurrent = 0 WHERE UserID = ?', [userId], (error, results) => {
+            if (error) {
+              console.error('isCurrent 업데이트 오류:', error);
+              return connection.rollback(() => {
+                return res.status(500).json({ success: false, message: 'isCurrent 업데이트 중 오류가 발생했습니다.' });
+              });
+            }
+
+            const acquisitionDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            connection.query('INSERT INTO user_icons (UserID, IconID, isCurrent, acquisitionDate) VALUES (?, ?, 1, ?)',
+              [userId, iconId, acquisitionDate], (error, results) => {
+                if (error) {
+                  console.error('아이콘 구매 정보 추가 오류:', error);
+                  return connection.rollback(() => {
+                    return res.status(500).json({ success: false, message: '아이콘 구매 정보 추가 중 오류가 발생했습니다.' });
+                  });
+                }
+
+                connection.commit(err => {
+                  if (err) {
+                    console.error('트랜잭션 커밋 오류:', err);
+                    return connection.rollback(() => {
+                      return res.status(500).json({ success: false, message: '트랜잭션 커밋 중 오류가 발생했습니다.' });
+                    });
+                  }
+
+                  // 구매 성공 응답, 이전에 추출한 iconFileURL을 사용하여 응답
+                  res.json({ success: true, message: '아이콘 구매가 완료되었습니다.', iconFileURL: iconFileURL });
+                });
+              });
+          });
+        });
+      });
+    });
+  });
+});
+
+
+
+
+// 사용자의 아이콘 목록 조회 API
+app.get('/api/user-icons/:userId', (req, res) => {
+  // URL 경로로부터 userId를 추출하기.
+  const { userId } = req.params;
+
+  // user_icons 테이블과 icon_shop 테이블을 조인하여 사용자가 보유한 아이콘과 해당 URL 정보를 조회
+  const query = `
+    SELECT user_icons.UserIconID, 
+    user_icons.UserID, user_icons.IconID, 
+    user_icons.isCurrent, 
+    user_icons.AcquisitionDate, 
+    icon_shop.IconFile AS IconURL FROM user_icons JOIN icon_shop ON user_icons.IconID = icon_shop.IconID
+    WHERE user_icons.UserID = ?
+  `;
+
+  connection.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching user icons:", error);
+      return res.status(500).send({ success: false, message: "Error fetching user icons" });
+    }
+
+    res.send(results);
+  });
+});
+
+
+
+// 현재 아이콘 선택 함수.
+app.post('/api/user-icons/set-current/:userId', (req, res) => {
+  const userId = req.params.userId; // URL에서 사용자 ID를 가져옵니다.
+  const { iconId } = req.body; // 요청 본문에서 아이콘 ID를 가져옵니다.
+
+  // 먼저 모든 아이콘의 isCurrent를 false로 설정합니다.
+  const resetQuery = 'UPDATE user_icons SET isCurrent = false WHERE UserID = ?';
+  connection.query(resetQuery, [userId], (error, results) => {
+    if (error) {
+      console.error("Error resetting user icons:", error);
+      return res.status(500).send("Failed to reset user icons.");
+    }
+
+    // 그 다음 선택된 아이콘의 isCurrent를 true로 설정합니다.
+    const updateQuery = 'UPDATE user_icons SET isCurrent = true WHERE UserID = ? AND IconID = ?';
+    connection.query(updateQuery, [userId, iconId], (error, results) => {
+      if (error) {
+        console.error("Error setting current icon:", error);
+        return res.status(500).send("Failed to set current icon.");
+      }
+
+      if (results.affectedRows > 0) {
+        res.send("Current icon updated successfully.");
+      } else {
+        // 이 경우는 일반적으로 발생하지 않지만, 만약 업데이트할 아이콘이 없으면 클라이언트에게 알립니다.
+        res.status(404).send("Icon not found.");
+      }
+    });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // <초기세팅> 서버실행 및 서버 종료(엔드포인트 코드이므로 항상 맨 마지막에 배치하기.)
 // 서버 Port 3001 : http://localhost:3001
 app.listen(3001, () => {
-        console.log('[Soldesk Node Server + React]');
-        process.on('SIGINT', () => {
-          console.log('Server is shutting down');
-          connection.end();
-          process.exit();
-        });
-     });
+  console.log('[Soldesk Node Server + React]');
+  process.on('SIGINT', () => {
+    console.log('Server is shutting down');
+    connection.end();
+    process.exit();
+  });
+});
