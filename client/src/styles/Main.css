@@ -64,12 +64,27 @@ td{
 .mainBody{
     background-color: #1E1E20;
     width: calc(1920px - 270px);
-    height: calc(850px);
+    height: calc(100vh - 80px);
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: scroll;
-}.boardName{
+}
+
+/* 스크롤바를 숨기는 스타일 */
+.mainBody::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.mainBody {
+    -ms-overflow-style: none; /* IE, Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+
+
+
+.boardName{
     color: white;
 }
 
@@ -147,6 +162,9 @@ td{
         border-bottom: 1px rgba(255,255,255, 0.2) solid;
         .post-like{
             margin-right: 20px;
+            &:hover{
+                cursor: pointer;
+            }
         }
         .post-comment{
 
@@ -196,6 +214,9 @@ td{
 .footer-btn-container{
     margin-top: 10px;
     margin-bottom: 10px;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: flex-end;
 }
 .board-btn{
     border: white solid 1px;
@@ -206,76 +227,16 @@ td{
     }
 }
 
-/* Post.css */
-.writeBox {
-    display: flex;
-    flex-wrap: wrap;
-    width: 1000px;
-    border: 1px rgba(255,255,255, 0.2) solid;
-    margin-top: 30px;
-    padding: 30px;
 
-    .write-header {
-        flex-basis: 100%;
-        margin-bottom: 20px;
-
-        .write-title {
-            font-size: 24px;
-            color: white;
-          }
-      }
-      
-      .write-body {
-        display: flex;
-        flex-wrap: wrap;
-        flex-basis: 100%;
-        margin-top: 10px;
-        margin-bottom: 30px;
-        border: rgba(255, 255, 255, 0.2) solid 1px;
-
-        input{
-          flex-basis: 100%;
-          background: none;
-          height: 50px;
-          border: none;
-          color: white;
-          margin: 20px;
-          margin-bottom: 0px;
-          padding: 10px;
-          &:focus{
-            outline: rgba(255, 255, 255, 0.5) solid 1px;
-            border-radius: 5px;
-        }
-        }
-        textarea {
-          flex-basis: 100%;
-          min-height: 500px;
-          background: none;
-          border: none;
-          color: white;
-          margin: 20px;
-          padding: 10px;
-          resize: none;
-          overflow: hidden;
-          &:focus{
-              outline: rgba(255, 255, 255, 0.5) solid 1px;
-              border-radius: 5px;
-          }
-        }
-      }
-      
-      .write-footer {
-        display: flex;
-        justify-content: flex-end;
-        .btnBox{
-            flex-basis: 100%;
-            display: flex;
-            justify-content: flex-end;
-            button{
-                border: white solid 1px;
-                background: none;
-                color: white;
-            }
-        }
-      }
+.hide-scrollbar {
+    overflow: auto;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE, Edge */
+    scrollbar-width: none; /* Firefox */
   }

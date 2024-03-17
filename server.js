@@ -372,7 +372,6 @@ app.get('/api/posts/:postId/comments', (req, res) => {
 
 // 댓글 추가
 app.post('/api/posts/:postId/comments', (req, res) => {
-  console.log("Received request body:", req.body);
   const { postId } = req.params;
   const { writer, content, board_id } = req.body;
 

@@ -1,0 +1,161 @@
+/* FriendRequestModal.jsx */
+.friend-request-modal{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+
+  .modal-content{
+    display: flex;
+    background-color: #02080e;
+    padding-top: 0px;
+    border: #463714 solid 3px;
+    width: 450px;
+    height: 550px;
+    max-height: 550px;
+    position: relative;
+    .close-wrapper{
+      position: absolute;
+      top: -5px;
+      right: 8px;
+      .close{
+          font-size: 30px;
+          color: #a39773;
+          cursor: pointer;
+          &:hover{
+            color: #ffffff;
+          }
+      }
+    }
+    .request-header-box{
+      width: auto;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      color: white;
+      border-bottom: rgba(255, 255, 255, 0.192) solid 1px;
+      span{
+        font-size: 16px;
+        font-weight: bolder;
+      }
+    }
+    .request-body-container{
+      overflow: auto;
+    }
+    .request-list-container{
+      display: flex;
+      /* border: white solid 1px; */
+      height: 60px;
+      &:hover{
+        background-color: #ffffff21;
+      }
+      .request-userIcon-box{
+        display: flex;
+        align-items: center;
+        img{
+          margin: 10px;
+          border-radius: 70%;
+          width: 30px;
+          height: 30px;
+          border: #0495a9 solid 3px;
+          object-fit: cover;    /* 이미지 비율 유지 */
+        }
+      }
+      .request-userInfo-container{
+        flex-basis: 100%;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        .request-nickname-box{
+          color: #a39773;
+          height: 20px;
+        }
+        .request-text-box{
+          font-size: 14px;
+          color: #C89B3C;
+          height: 20px;
+        }
+      }
+      .request-btn-container{
+        scale: 25%;
+        transform-origin: right;
+        display: flex;
+        margin-right: 10px;
+        button{
+          background: none;
+          border: none;
+          outline: none;
+          filter: saturate(700%);
+          &:hover{
+            filter: saturate(0%) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+          }
+        }
+      }
+    }
+    
+  }
+}
+
+
+
+/* FriendRequest.jsx */
+.friend-request{
+  margin-bottom: 5px;
+  position: relative;
+
+  .friend-request-box{
+    background-color: #020e17;
+    height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:hover{
+      background-color: #ffffff21;
+      
+    }
+    &:active{
+      background-color: #9b9b9b21;
+    }
+    .friend-request-text{
+      color: #C89B3C;
+      position: absolute;
+      left: 10px;
+      top: 15px;
+    }
+
+    .count-container{
+      background-color: #C89B3C;
+      width: auto;
+      height: auto;
+      border-radius: 5px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 8px;
+      padding-right: 8px;
+      position: absolute;
+      right: 10px;
+      top: 15px;
+      
+      
+      .friend-request-count{
+        /* background-color: #C89B3C;
+        background-size: auto;
+        border-radius: 15%; */
+        color: #020e17;
+        font-size: 14px;
+        font-weight: bold;
+        
+      }
+    }
+  }
+}

@@ -94,7 +94,6 @@ function SignUpModal({show, onHide}) {
             nickname: '',
             address: '',
             authority: 'user',
-            icon: 'null'
           });
           alert('회원가입 성공!');
           onHide(); // 모달 닫기
@@ -127,7 +126,7 @@ function SignUpModal({show, onHide}) {
         <Modal.Header>
           <Modal.Title id="contained-modal-title-vcenter" 
                         style={{display: 'flex', width: '100%', height: '40px'}}>
-            <p style={{flexBasis:'30%'}}>계정 생성</p>
+            <p style={{flexBasis:'30%', color:'black'}}>계정 생성</p>
             <div style={{flexBasis:'100%'}}>
               <button style={{float : 'right', border: 'none', background: 'none'}} onClick={handleClose}>X</button>
             </div>

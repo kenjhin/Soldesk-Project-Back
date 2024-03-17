@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import '../styles/App.css';
 import '../styles/Main.css';
 import formatDate from '../components/function/formatDate';
-const Board = () => {
 
+const Board = () => {
   const location = useLocation();
   const boardId = location.state?.boardId;
   const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
@@ -12,30 +12,27 @@ const Board = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(20);
 
-  // 컴포넌트 마운트 시 게시물 리스트 가져오기
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(`http://localhost:3001/api/posts/list?boardId=${boardId}`);
         const data = await response.json();
-        setData(data); // 가져온 데이터로 posts 상태 업데이트
+        setData(data); // 데이터가 배열 형태인지 확인 후 상태 업데이트
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
     fetchData();
-  }, [boardId]); // boardId가 변경될 때마다 fetchData 함수 실행
+  }, [boardId]);
 
-
-
-  // 페이지 변경 함수
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const totalPages = Math.ceil(data.length / postsPerPage);
-
-  // 현재 페이지에서 보여줄 포스트 계산
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = data.slice(indexOfFirstPost, indexOfLastPost);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+
+  // 데이터가 배열인 경우에만 slice 사용
+  const currentPosts = Array.isArray(data) ? data.slice(indexOfFirstPost, indexOfLastPost) : [];
 
   return (
     <div style={{ width: "100%", height: "100%", paddingRight: "50px", paddingLeft: "50px", overflow: "scroll", display: "flex", justifyContent: "center" }}>
@@ -51,19 +48,15 @@ const Board = () => {
               <th className="th_writer">작성자</th>
               <th className="th_date">작성일</th>
               <th className="th_views">조회수</th>
-              <th className="th_like">추천</th>
+              <th className="th_like">좋아요</th>
             </tr>
           </thead>
           <tbody> 
           {currentPosts.map((post, index) => (
             <tr key={index}>
-              {/* 게시글 번호를 순서대로 표시 */}
               <td className="td_id">{index + 1}</td> 
               <td className="td_title">
-              <Link
-                to={`/board/${post.boardId}/${post.id}`}
-                state={{ post }}
-              >
+              <Link to={`/board/${post.boardId}/${post.id}`} state={{ post }}>
                 {post.title}
               </Link>
               </td>

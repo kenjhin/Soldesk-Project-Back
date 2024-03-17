@@ -1,11 +1,13 @@
 /* eslint-disable */
-import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import getCurrentDateTime from "../components/function/getCurrentDateTime";
-import { useUser } from "../contexts/UserContext"; // 사용자 정보를 가져오는 컨텍스트
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import formatDate from "../components/function/formatDate";
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import getCurrentDateTime from '../components/function/getCurrentDateTime';
+import { useUser } from '../contexts/UserContext'; // 사용자 정보를 가져오는 컨텍스트
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import formatDate from '../components/function/formatDate';
+import '../styles/Post.css'
+
 
 const PostDetail = () => {
   const { userData } = useUser(); // 현재 로그인한 유저 정보 사용
@@ -13,6 +15,24 @@ const PostDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const post = location.state?.post;
+
+
+  // 조회수증가
+  useEffect(() => {
+    const view = post.views + 1;
+    const fetchData = async () => {
+      try {
+        await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+          views: view
+        });
+      } catch (error) {
+          console.error('조회수 수정 오류 발생:', error);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
 
   useEffect(() => {
     console.log("PostDetail 컴포넌트 마운트됨. post 객체:", post);
@@ -97,47 +117,45 @@ const PostDetail = () => {
 
   // 2) 수정된 게시글 내용을 서버로 전송하는 로직
   const handleEditSave = async () => {
-    try {
-      await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
-        title: editedTitle,
-        content: editedContent,
-      });
-      alert("게시글이 수정되었습니다.");
-      setIsEditing(false); // 수정 모드 비활성화
-      navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
-    } catch (error) {
-      console.error("게시글 수정 중 오류 발생:", error);
-      alert("게시글 수정에 실패했습니다.");
+    
+  try {
+    await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+      title: editedTitle,
+      content: editedContent,
+    });
+    alert('게시글이 수정되었습니다.');
+    setIsEditing(false); // 수정 모드 비활성화
+    navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
+  } catch (error) {
+      console.error('게시글 수정 중 오류 발생:', error);
+      alert('게시글 수정에 실패했습니다.');
     }
   };
 
   // 수정 모드일 때의 뷰
   if (isEditing) {
     return (
-      <div className="postBox">
-        <div className="post-header">
-          <h2 className="post-title">
-            <input
-              className="titleInput"
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-            />
-          </h2>
+      <div className='writeBox'>
+        <div className='write-header'>
+          <h2 className='write-title'>글 수정</h2>
         </div>
-        <div className="post-body">
-          <p className="post-content">
-            <textarea
-              className="contentTextarea"
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-            />
-          </p>
+        <div className='write-body'>
+          <input
+            type='text'
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            placeholder='제목을 입력해주세요.'
+          />
+          <textarea
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            placeholder='내용을 입력해주세요.'
+          />
         </div>
-        <div className="post-footer">
-          <button className="saveButton" onClick={handleEditSave}>
-            저장
-          </button>
+        <div className='write-footer'>
+          <div className='btnBox'>
+            <button className="saveButton" onClick={handleEditSave}>저장</button>
+          </div>
         </div>
       </div>
     );
@@ -148,7 +166,7 @@ const PostDetail = () => {
     if (window.confirm("게시글을 삭제하시겠습니까?")) {
       try {
         await axios.delete(`http://localhost:3001/api/posts/${post?.id}`);
-        alert("게시글이 삭제되었습니다.");
+        alert('게시글이 삭제되었습니다.');
         navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
       } catch (error) {
         console.error("게시글 삭제 중 오류 발생:", error);
@@ -192,9 +210,25 @@ const editComment = async (commentId) => {
 };
 
 
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  const handleClickLikes = () => {
+    const like = post.likes + 1;
+    setPost({...post, likes: like});
+    handleUpdateLikes(like);
+  }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
+  const handleUpdateLikes = async (like) => {
+    try {
+      await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+        likes: like
+      });
+    } catch (error) {
+        console.error('좋아요 수정 오류 발생:', error);
+    }
+  };
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
     <div className="postBox">

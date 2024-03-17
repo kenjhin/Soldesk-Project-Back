@@ -1,0 +1,114 @@
+App 전체 배경 및 텍스트 색상 조정
+body {
+  background-color: #000; /* 배경을 검은색으로 설정 */
+  color: #b5a642; /* 골드 색상의 텍스트 */
+  font-family: 'Helvetica', 'Arial', sans-serif;
+}
+
+.store-container {
+  max-width: 1400px; /* 가로 너비 확장 */
+  margin: auto;
+  padding: 20px;
+}
+
+.My-Point {
+  background-color: #333; /* 어두운 배경에 어울리는 색상 */
+  color: #ffd700; /* 골드 색상 */
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4); /* 골드 색상의 그림자 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icons-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 아이콘 가로로 5개 배열 */
+  gap: 20px;
+}
+
+.icon-item {
+  background-color: #222; /* 어두운 배경에 어울리는 색상 */
+  color: #ffd700; /* 골드 색상의 텍스트 */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 초기 그림자 */
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+  animation: shine 1s infinite alternate; /* 지속 시간을 1초로 조정 */
+}
+
+@keyframes shine {
+  0%, 100% {
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+  }
+  10%, 90% {
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  }
+  20%, 80% {
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+  }
+  30%, 70% {
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
+  }
+  40%, 60% {
+    box-shadow: 0 4px 25px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(255, 215, 0, 0.7);
+  }
+}
+
+.StoreAdminBtn {
+  background-color: #b5a642; /* 골드 색상 */
+  color: #000;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.StoreAdminBtn:hover {
+  background-color: #d4af37; /* 골드 색상을 더 밝게 */
+}
+
+.icon-shop-banner {
+  background-color: #222; /* 어두운 배경 */
+  color: #ffd700; /* 골드 색상의 텍스트 */
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 골드 색상의 그림자 */
+  width: 100%; /* 배너 너비 확장 */
+}
+
+.icon-shop-banner p {
+  margin: 0;
+  font-size: 3rem; /* 텍스트 사이즈 증가 */
+  font-weight: bold;
+  text-transform: uppercase; /* 대문자 변환 */
+  letter-spacing: 5px; /* 글자 간격 확장 */
+}
+
+.button-buy {
+  background-color: #b5a642; /* 기본 골드 색상 */
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* 부드러운 전환 효과 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 초기 그림자 */
+  transform: scale(1); /* 초기 크기 */
+}
+
+.button-buy:hover {
+  background-color: #ffd700; /* 마우스 오버 시 더 밝은 골드 */
+  color: #222;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4); /* 마우스 오버 시 그림자 강조 */
+  transform: scale(1.05); /* 마우스 오버 시 약간 크기 증가 */
+}
