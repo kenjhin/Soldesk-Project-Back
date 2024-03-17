@@ -108,14 +108,14 @@ const Messenger = () => {
   // 그룹 관리
   useEffect(() => {
     // 친구 그룹 확장 여부 설정
-    const allGroupNames = [...new Set(userFriends.map((group) => group.group_name))];
+    const allGroupNames = [...new Set(userFriends.map((group) => group.groupName))];
     setExpandedGroups(allGroupNames);
     updateUniqueGroupNames();
   }, [userFriends]);
 
   // updateUniqueGroupNames
   const updateUniqueGroupNames = () => {
-    const newUniqueGroupNames = [...new Set(userFriends.map((group) => group.group_name))];
+    const newUniqueGroupNames = [...new Set(userFriends.map((group) => group.groupName))];
     const sortedGroupNames = sortGroupNames(newUniqueGroupNames);
     setUniqueGroupNames(sortedGroupNames);
   };
@@ -171,15 +171,15 @@ const Messenger = () => {
           </div>
           {expandedGroups.includes(group) && (
             userFriends
-              .filter((data) => data.group_name === group)
+              .filter((data) => data.groupName === group)
               .map((friends, j) => (
                 <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-                    <img src={friends.iconURL} alt='friend-icon' />
+                    <img src={friends.iconURL} alt='friend-icon'/>
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>
-                    <span className='friend-profile-message'>{friends.profile_message}</span>
+                    <span className='friend-profile-message'>{friends.profileMessage}</span>
                   </div>
                 </div>
               ))

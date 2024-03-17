@@ -104,6 +104,7 @@ td{
     .host-post{
         flex-basis: 100%;
         border: white solid 1px;
+        padding: 50px;
     }
 }
 
