@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -206,45 +206,38 @@ app.get('/userData', (req, res) => {
 });
 
 
-  app.get('/userFriends', (req, res) => {
-    if (!req.session.username) {
-      return res.status(401).json({ message: '로그인이 필요합니다.' });
-    }
-  
-    const username = req.session.username;
-  
-    // 유저 친구 정보 조회
-    const selectQuery = 'SELECT group_name, friend_id FROM user_friends WHERE user_id = ?';
-    connection.query(selectQuery, [username], (error, friendResults) => {
-      if (error) {
-        console.error('DB 조회 오류:', error);
-        return res.status(500).json({ message: 'user_friends를 조회할 수 없습니다.' });
-      }
-  
-      // 친구 목록의 프로필 메시지 조회
-      const friendIds = friendResults.map(result => result.friend_id); // 여기가 수정된 부분입니다.
-      const profileQuery = 'SELECT username, nickname, profile_message, current_icon FROM user WHERE username IN (?)';
-      connection.query(profileQuery, [friendIds], (error, profileResults) => {
-        if (error) {
-          console.error('프로필 조회 오류:', error);
-          return res.status(500).json({ success: false, error: '프로필을 조회할 수 없습니다.' });
-        }
-  
-        // 프로필 메시지를 결과에 추가
-        const resultsWithProfile = friendResults.map(friendResult => {
-          const profile = profileResults.find(profile => profile.username === friendResult.friend_id);
-          return {
-            ...friendResult,
-            profile_message: profile ? profile.profile_message : null,
-            nickname: profile ? profile.nickname : null,
-            current_icon: profile ? profile.current_icon : null,
-          };
-        });
-  
-        res.json(resultsWithProfile);
-      });
-    });
-  });
+app.get('/userFriends', async (req, res) => {
+  if (!req.session.username) {
+    return res.status(401).json({ message: '로그인이 필요합니다.' });
+  }
+
+  const username = req.session.username;
+
+  try {
+    // 유저 친구 정보 및 각 친구의 현재 아이콘 정보 조회
+    const selectQuery = `
+    SELECT uf.friend_id, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL
+    FROM user_friends uf
+    JOIN user u ON uf.friend_id = u.username
+    LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
+    LEFT JOIN icon_shop ics ON ui.IconID = ics.IconID
+    WHERE uf.user_id = ?
+    `;
+
+    const [friendResults] = await connection.promise().query(selectQuery, [username]);
+    // console.log(friendResults)
+    // 결과 응답 (아이콘 URL이 없는 경우 기본 아이콘 사용)
+    res.json(friendResults.map(friend => ({
+      friendId: friend.friend_id,
+      nickname: friend.nickname,
+      profileMessage: friend.profile_message,
+      iconURL: friend.IconURL  // 기본 아이콘 경로 설정
+    })));
+  } catch (error) {
+    console.error('DB 조회 오류:', error);
+    res.status(500).json({ message: '친구 정보를 조회할 수 없습니다.' });
+  }
+});
 
 app.get('/users/nickname', (req, res) => {
   // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
