@@ -17,7 +17,6 @@ import FriendRequests from './FriendRequests';
 const Messenger = () => {
   // context
   const { userData, setUserData } = useUser();
-  const { icons, setIcons } = useIcon();
 
   // 그룹
   const [expandedGroups, setExpandedGroups] = useState();
@@ -43,6 +42,7 @@ const Messenger = () => {
   };
   
   const openChatModal = (friendInfo) => {
+    console.log(friendInfo); // friendInfo 객체 구조 확인
     setChatTarget(friendInfo);
     setModalShow(true);
   };
@@ -175,7 +175,7 @@ const Messenger = () => {
               .map((friends, j) => (
                 <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-                    <img src={icons[friends.current_icon]} alt='friend-icon' />
+                    <img src={friends.iconURL} alt='friend-icon' />
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>
@@ -202,7 +202,6 @@ const Messenger = () => {
             setChatTarget={setChatTarget}
             currentChat={currentChat}
             setCurrentChat={setCurrentChat}
-            icons={icons}
             userFriends={userFriends}
           />
         )}
