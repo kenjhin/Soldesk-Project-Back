@@ -7,6 +7,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import formatDate from '../components/function/formatDate';
 import '../styles/Post.css'
+import '../styles/PostDetail.css'
+
+
 
 
 const PostDetail = () => {
@@ -19,19 +22,23 @@ const PostDetail = () => {
 
   // 조회수증가
   useEffect(() => {
-    const view = post.views + 1;
-    const fetchData = async () => {
+    const updatePostViews = async () => {
       try {
         await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
-          views: view
+          title: post.title, 
+          content: post.content, 
+          views: post.views + 1 
         });
       } catch (error) {
-          console.error('조회수 수정 오류 발생:', error);
+          console.error('조회수 업데이트 중 오류 발생:', error);
       }
     };
     
-    fetchData();
-  }, []);
+    updatePostViews();
+}, [post]);
+
+
+
 
 
   useEffect(() => {
@@ -117,7 +124,6 @@ const PostDetail = () => {
 
   // 2) 수정된 게시글 내용을 서버로 전송하는 로직
   const handleEditSave = async () => {
-    
   try {
     await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
       title: editedTitle,
@@ -131,6 +137,8 @@ const PostDetail = () => {
       alert('게시글 수정에 실패했습니다.');
     }
   };
+
+  
 
   // 수정 모드일 때의 뷰
   if (isEditing) {
@@ -262,11 +270,15 @@ const editComment = async (commentId) => {
             <div className="comments">
               {comment.map((cmt) => (
                 <div key={cmt.comment_id} className="comment">
-                  <h4>{cmt.writer}</h4>
+                  <h4 className="comment-writer">{cmt.writer}</h4>
                   <p>{cmt.content}</p>
-                  <small>{new Date(cmt.created_ad).toLocaleString()}</small>
-                  <button onClick={() => editComment(cmt.comment_id)}>수정</button>
-                  <button onClick={() => deleteComment(cmt.comment_id)}>삭제</button>
+                  <small className="comment-date">{new Date(cmt.created_ad).toLocaleString()}</small>
+                  {userData.username === cmt.writer && (
+                    <>
+                      <button onClick={() => editComment(cmt.comment_id)} className="comment-edit">수정</button>
+                      <button onClick={() => deleteComment(cmt.comment_id)} className="comment-delete">삭제</button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
