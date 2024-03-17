@@ -191,7 +191,11 @@ app.get('/userData', (req, res) => {
   }
 });
 
-app.get('/userFriends', (req, res) => {
+app.get('/userFriends', async (req, res) => {
+  if (!req.session.username) {
+    return res.status(401).json({ message: '로그인이 필요합니다.' });
+  }
+
   const username = req.session.username;
 
   try {
