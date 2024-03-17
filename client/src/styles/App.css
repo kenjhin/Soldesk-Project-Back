@@ -534,13 +534,15 @@ body{
 }.iconSelectArea{
   outline: #463714 solid 1px;
   height: 480px;
-  width: 670px;
+  width: 730px;
   padding: 5px;
 }.icon-container{
+
   display: flex;
   flex-wrap: wrap;
   height: auto;
 }.iconsBox{
+  border: white solid 1px;
   width: 100px;
   height: 100px;
   margin: 5px;

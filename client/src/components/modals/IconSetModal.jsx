@@ -38,7 +38,7 @@ const IconSetModal = ({ img }) => {
               <div className="iconModalLeftBox">
                 {/* 현재 선택된 아이콘 이미지 표시 */}
                 {currentUserIcon && (
-                  <img src={currentUserIcon.IconURL} alt="Current User Icon" style={{ width: '50px', height: '50px', marginBottom: '10px' }} />
+                  <img src={currentUserIcon.IconURL} alt="Current User Icon"/>
                 )}
                 <p>{userData.nickname}</p>
               </div>
@@ -50,9 +50,10 @@ const IconSetModal = ({ img }) => {
                   <div className="icon-container">
                     {userIcons.map(icon => (
                       <div key={icon.UserIconID} 
+                      className='iconsBox'
                       onClick={() => handleIconClick(icon.IconID)} 
                       style={{ cursor: 'pointer', margin: '10px' }}>
-                        <img src={icon.IconURL} alt="User Icon" style={{ width: '50px', height: '50px' }} />
+                        <img src={icon.IconURL} alt="User Icon"/>
                       </div>
                     ))}
                   </div>
