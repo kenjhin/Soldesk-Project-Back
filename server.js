@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
@@ -246,7 +246,7 @@ app.get('/userData', (req, res) => {
     });
   });
 
-app.get('/Users/Nickname', (req, res) => {
+app.get('/users/nickname', (req, res) => {
   // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
   const selectQuery = 'SELECT nickname FROM user';
   connection.query(selectQuery, (error, results) => {
@@ -480,6 +480,27 @@ app.get('/friendRequest/receive', (req, res) => {
     if (error) {
       console.error('Fetch friend-requests error:', error);
       return res.status(500).json({ message: 'Error fetching friend-requests' });
+    }
+
+    res.json(results);
+  });
+});
+
+// 내가 보낸 친구요청(이미 친추 보낸 상대에겐 친추 못보내게)
+app.get('/friendRequest/myRequest', (req, res) => {
+  const username = req.session.username;
+
+  const selectQuery = `
+    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u1.nickname AS sender_nickname, u2.nickname AS receiver_nickname
+    FROM friend_requests fr 
+    INNER JOIN user u1 ON fr.sender_id = u1.username 
+    INNER JOIN user u2 ON fr.receiver_id  = u2.username 
+    WHERE fr.sender_id = ? AND fr.status = 'awaiting'
+  `;
+  connection.query(selectQuery, [username], (error, results) => {
+    if (error) {
+      console.error('Fetch myRequest error:', error);
+      return res.status(500).json({ message: 'Error fetching myRequest' });
     }
 
     res.json(results);

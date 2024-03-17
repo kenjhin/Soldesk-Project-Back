@@ -45,6 +45,7 @@
     cursor: pointer;
     font-size: 13px;
     font-weight: bold;
+    color: black;
 }.idCheckbox{
     margin-right: 5px;
     border-radius: 20%;
