@@ -15,8 +15,8 @@ const MemoryStore = require('memorystore')(session); // 메모리에 세션 정�
   const mysql      = require('mysql2');
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
-    host     : '211.52.60.107',
-    user     : 'ku',
+    host     : 'localhost',
+    user     : 'root',
     password : '1234',
     database : 'soldesk'
   });
@@ -221,7 +221,7 @@ app.get('/userFriends', (req, res) => {
         }
       }
 
-      // 최종 결과 반환
+      // 최종 결과 반환 
       res.json(results);
     });
   });
@@ -273,7 +273,7 @@ app.post('/api/posts', (req, res) => {
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
+  const query = 'SELECT id, title, user_id, content, board_id, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
@@ -353,6 +353,76 @@ app.delete('/api/posts/:id', (req, res) => {
     }
 
     res.json({ message: '게시물이 성공적으로 삭제되었습니다.' });
+  });
+});
+
+// 댓글 목록 불러오기
+app.get('/api/posts/:postId/comments', (req, res) => {
+  const { postId } = req.params;
+
+  const query = 'SELECT * FROM comment WHERE post_id = ?';
+  connection.query(query, [postId], (error, results) => {
+      if (error) {
+          console.error('댓글 불러오기 실패 :', error);
+          return res.status(500).json({ message: '댓글 불러오기 실패 ' });
+      }
+      res.json(results);
+  });
+});
+
+// 댓글 추가
+app.post('/api/posts/:postId/comments', (req, res) => {
+  console.log("Received request body:", req.body);
+  const { postId } = req.params;
+  const { writer, content, board_id } = req.body;
+
+  const query = 'INSERT INTO comment (post_id, writer, content, board_id) VALUES (?, ?, ?, ?)';
+  connection.query(query, [postId, writer, content, board_id], (error, results) => { 
+      if (error) {
+          console.error('댓글 추가 중 에러:', error);
+          return res.status(500).json({ message: '댓글 추가 실패' });
+      }
+      res.status(201).json({ message: '댓글 추가 성공', commentId: results.insertId });
+  }); 
+});
+
+// 댓글 삭제하기
+app.delete('/api/comments/:commentId', (req, res) => {
+  
+  const { commentId } = req.params;
+  
+  const query = 'DELETE FROM comment WHERE comment_id = ?';
+  connection.query(query, [commentId], (error, results) => {
+    if (error) {
+      console.error("댓글 삭제 중 오류 발생:", error);
+      res.status(500).json({ message: "댓글 삭제에 실패했습니다." });
+    } else if (results.affectedRows === 0) {
+      res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
+    } else {
+      res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
+    }
+  });
+});
+
+// 댓글 수정
+app.put('/api/comments/:commentId', (req, res) => {
+  const { commentId } = req.params;
+  const { content } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ message: "댓글 내용을 입력해주세요." });
+  }
+
+  const query = 'UPDATE comment SET content = ? WHERE comment_id = ?';
+  connection.query(query, [content, commentId], (error, results) => {
+    if (error) {
+      console.error("댓글 수정 중 오류 발생:", error);
+      return res.status(500).json({ message: "댓글 수정에 실패했습니다." });
+    } else if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
+    } else {
+      return res.status(200).json({ message: "댓글이 성공적으로 수정되었습니다." });
+    }
   });
 });
 
