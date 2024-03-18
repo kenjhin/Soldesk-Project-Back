@@ -9,6 +9,7 @@ import "../styles/App.css";
 import storeIco from "../assets/img/home/nav-icon-store.png";
 import inventoryIco from "../assets/img/home/nav-icon-collections.png";
 import RpIco from "../assets/img/icon-rp-24.png";
+import RpIco2 from "../assets/img/icon-rp-gradient-32.png";
 // user_icon
 import icon_hamster from "../assets/img/icons/hamster.jpg";
 import icon_challenger from "../assets/img/icons/challenger.jpg";
@@ -44,6 +45,7 @@ function Home({setLogined}) {
         const response = await axios.get('http://localhost:3001/userData', { withCredentials: true });
         if (response.data.success) {
           setUserData(response.data.user); // API 응답으로 받은 유저 데이터로 상태 업데이트
+          console.log(response.data)
         } else {
           console.log('유저 데이터 로드 실패');
         }
@@ -114,8 +116,8 @@ function Home({setLogined}) {
             </Link>
           </div>
           <div className="RpBox">
-            <div><img src={RpIco}/></div>
-            {userData && <div className="RpBoxFont">{userData.point}</div>}
+            <div className="Rp-imgBox"><img src={RpIco2}/></div>
+            <div className="RpBoxFont"><span>{userData?.point}</span></div>
           </div>
         </div>
         <div className="headerProfileBox">
