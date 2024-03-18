@@ -116,7 +116,7 @@ const PostDetail = () => {
     });
     alert('게시글이 수정되었습니다.');
     setIsEditing(false); // 수정 모드 비활성화
-    navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
+    navigate(`/board/${post?.board_id}`); // 게시글 목록 페이지로 리다이렉트
   } catch (error) {
       console.error('게시글 수정 중 오류 발생:', error);
       alert('게시글 수정에 실패했습니다.');
