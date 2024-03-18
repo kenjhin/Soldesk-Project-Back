@@ -254,15 +254,17 @@ const editComment = async (commentId) => {
             <div className="comments">
               {comment.map((cmt) => (
                 <div key={cmt.id} className="comment">
-                  <h4 className="comment-writer">{cmt.writer}</h4>
+                  <h4 className="comment-writer">{cmt.nickname}</h4>
                   <p>{cmt.content}</p>
-                  <small className="comment-date">{new Date(cmt.created_ad).toLocaleString()}</small>
-                  {userData.username === cmt.writer && (
-                    <>
-                      <button onClick={() => editComment(cmt.id)} className="comment-edit">수정</button>
-                      <button onClick={() => deleteComment(cmt.id)} className="comment-delete">삭제</button>
-                    </>
-                  )}
+                  <div className='comment-footer'> 
+                    <small className="comment-date">{new Date(cmt.created_at).toLocaleString()}</small>
+                    {userData.username === cmt.writer && (
+                      <div className='comment-btn'>
+                        <button onClick={() => editComment(cmt.id)} className="comment-edit">수정</button>
+                        <button onClick={() => deleteComment(cmt.id)} className="comment-delete">삭제</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
@@ -424,7 +424,11 @@ app.delete('/api/posts/:id', (req, res) => {
 app.get('/api/posts/:postId/comments', (req, res) => {
   const { postId } = req.params;
 
-  const query = 'SELECT * FROM comment WHERE post_id = ?';
+  // const query = 'SELECT id, post_id, writer, content, created_at FROM comment WHERE post_id = ?';
+  const query =  `SELECT c.id, c.post_id, c.writer, c.content, c.created_at, u.nickname
+                  FROM comment c
+                  JOIN user u ON c.writer = u.username
+                  WHERE c.post_id = ?`;
   connection.query(query, [postId], (error, results) => {
       if (error) {
           console.error('댓글 불러오기 실패 :', error);
