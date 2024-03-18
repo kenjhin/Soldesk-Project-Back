@@ -56,7 +56,7 @@ const Board = () => {
             <tr key={index}>
               <td className="td_id">{index + 1}</td> 
               <td className="td_title">
-              <Link to={`/board/${post.boardId}/${post.id}`} state={{ post }}>
+              <Link to={`/board/${post.board_id}/${post.id}`} state={{ post }}>
                 {post.title}
               </Link>
               </td>

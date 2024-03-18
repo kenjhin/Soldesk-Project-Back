@@ -14,13 +14,15 @@ const formatDate = (isoDate, type) => {
   // MM.DD 형식 또는 YYYY.MM.DD HH.mm 형식에 맞게 가공
   const [date, time] = formattedDate.split(', ');
   const [month, day, year] = date.split('/');
-  const today = new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const today = new Date().toLocaleString(['en-US'], { year: 'numeric', month: '2-digit', day: '2-digit' });
 
   var formattedDateString1;
   var formattedDateString2 = `${year}.${month}.${day}. ${time}`;
 
   if(today===date){
-    formattedDateString1 = `${new Date(isoDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})}`
+    const hour = new Date(isoDate).getHours();
+    const formattedHour = hour >= 24 ? '00' : String(hour).padStart(2, '0'); // 시간값이 24를 넘어가면 00으로 변경
+    formattedDateString1 = `${formattedHour}:${new Date(isoDate).getMinutes()}`;
   } else{
     formattedDateString1 = `${year}.${month}.${day}.`
   }

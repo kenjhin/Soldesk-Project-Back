@@ -10,14 +10,13 @@ import '../styles/Post.css'
 import '../styles/PostDetail.css'
 
 
-
-
 const PostDetail = () => {
   const { userData } = useUser(); // 현재 로그인한 유저 정보 사용
   const textarea = useRef(); // 댓글 입력창 참조
   const location = useLocation();
   const navigate = useNavigate();
-  const post = location.state?.post;
+  const postData = location.state?.post; 
+  const [post, setPost] = useState(postData);
 
 
 // 조회수증가
@@ -33,14 +32,6 @@ const PostDetail = () => {
     };
     updatePostViews();
 }, [post]);
-
-
-
-
-
-  useEffect(() => {
-    console.log("PostDetail 컴포넌트 마운트됨. post 객체:", post);
-  }, [post]);
   
 
   // 댓글 입력창 크기 자동 조절 함수
@@ -57,13 +48,11 @@ const PostDetail = () => {
       return;
     }
 
-    
     try {
       // 댓글 생성 API 호출
       await axios.post(`http://localhost:3001/api/posts/${post.id}/comments`, {
         writer: userData.username, 
         content: commentContent,
-        board_id: post.board_id,
       });
   
       // 댓글 목록을 다시 불러옵니다. (댓글 목록 갱신)
@@ -94,7 +83,6 @@ const PostDetail = () => {
       const response = await axios.get(
         `http://localhost:3001/api/posts/${post.id}/comments`
       );
-      console.log(response.data); // 응답 확인
       setComment(response.data); // 가져온 댓글 데이터로 상태 업데이트
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -246,7 +234,7 @@ const editComment = async (commentId) => {
         <p className="post-content">{post?.content}</p>
       </div>
       <div className="post-footer">
-        <p className="post-like">♡좋아요 {post?.like}</p>
+      <p className='post-like' onClick={handleClickLikes}>♡좋아요 {post?.likes}</p>
         <p className="post-comment">
           댓글 {comment.filter((data) => data.postId === post?.id).length}
         </p>
@@ -265,14 +253,14 @@ const editComment = async (commentId) => {
             {/* 댓글 데이터가 동적으로 처리되도록 구현 필요 */}
             <div className="comments">
               {comment.map((cmt) => (
-                <div key={cmt.comment_id} className="comment">
+                <div key={cmt.id} className="comment">
                   <h4 className="comment-writer">{cmt.writer}</h4>
                   <p>{cmt.content}</p>
                   <small className="comment-date">{new Date(cmt.created_ad).toLocaleString()}</small>
                   {userData.username === cmt.writer && (
                     <>
-                      <button onClick={() => editComment(cmt.comment_id)} className="comment-edit">수정</button>
-                      <button onClick={() => deleteComment(cmt.comment_id)} className="comment-delete">삭제</button>
+                      <button onClick={() => editComment(cmt.id)} className="comment-edit">수정</button>
+                      <button onClick={() => deleteComment(cmt.id)} className="comment-delete">삭제</button>
                     </>
                   )}
                 </div>
