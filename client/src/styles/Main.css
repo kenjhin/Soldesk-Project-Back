@@ -167,20 +167,63 @@ td{
                 cursor: pointer;
             }
         }
-        .post-comment{
-
-        }
         .commentBox{
             display: flex;
             flex-basis: 100%;
-            .comment-body{
-                display: flex;
-                flex-wrap: wrap;
+            flex-wrap: wrap;
+            
+        }
+    }
+}.comment-body{
+    display: flex;
+    flex-wrap: wrap;
+    flex-basis: 100%;
+    /* border: white solid 1px; */
+    .comments{
+        flex-basis: 100%;
+        .comment{
+            display: flex;
+            flex-wrap: wrap;
+            flex-basis: 100%;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px rgba(255,255,255, 0.2) solid;
+            .comment-writer{
                 flex-basis: 100%;
+                margin: 0px;
+                color: white;
+                font-size: 16px;
+                font-family: "nbg";
+            }
+            .comment-date{
+                margin-right: 10px;
+                flex-basis: 50%;
+            }
+            p{
+                flex-basis: 100%;
+                font-family: "nbgL";
+            }
+            .comment-footer{
+                display: flex;
+                flex-basis: 100%;
+            }
+            .comment-btn{
+                display: flex;
+                justify-content: flex-end;
+                flex-basis: 50%;
+                button{
+                    border: gray solid 1px;
+                    background: none;
+                    color: white;
+                    font-size: 14px;
+                    margin: 0px;
+                    &:hover{
+                        background: linear-gradient(180deg,rgba(255,255,255,0) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+                    }
+                }
             }
         }
     }
-    
 }.comment-textarea-container{
     border: solid rgba(255, 255, 255, 0.2) 1px;
     flex-basis: 100%;
@@ -220,7 +263,7 @@ td{
     justify-content: flex-end;
 }
 .board-btn{
-    border: white solid 1px;
+    border: gray solid 1px;
     background: none;
     color: white;
     &:hover{
@@ -242,15 +285,35 @@ td{
     scrollbar-width: none; /* Firefox */
   }
   .RpBox {
-    border-left: 5px solid #1C1C1C; /* 좌측 테두리 */
+    border-left: 2px solid #1C1C1C; /* 좌측 테두리 */
     padding: 20px;
     display: flex;
     margin: 1px;
+
+    .Rp-imgBox{
+        height: 30px;
+        display: flex;
+        align-items: center;
+  
+    }
+    img{
+        margin-right: 5px;
+        width: 25px;
+    }
   }
   .RpBox div{
     margin: 2px;
   }
   .RpBoxFont {
-    color: #CDBE91;
-    font-weight: 900;
+    height: 31px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+
+    span{
+        color: #CDBE91;
+        font-family: "nbg";
+        font-weight: bold;
+        font-size: 18px;
+    }
   }
