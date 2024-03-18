@@ -257,18 +257,21 @@ const editComment = async (commentId) => {
             <div className="comments">
               {comment.map((cmt) => (
                 <div key={cmt.id} className="comment">
+                <img src={cmt.IconURL} alt="User Icon" />
+                <div className="comment-info">
                   <h4 className="comment-writer">{cmt.nickname}</h4>
                   <p>{cmt.content}</p>
-                  <div className='comment-footer'> 
-                    <small className="comment-date">{new Date(cmt.created_at).toLocaleString()}</small>
-                    {userData.username === cmt.writer && (
-                      <div className='comment-btn'>
-                        <button onClick={() => editComment(cmt.id)} className="comment-edit">수정</button>
-                        <button onClick={() => deleteComment(cmt.id)} className="comment-delete">삭제</button>
-                      </div>
-                    )}
-                  </div>
                 </div>
+                <div className='comment-footer'> 
+                  <small className="comment-date">{new Date(cmt.created_at).toLocaleString()}</small>
+                  {userData.username === cmt.writer && (
+                    <div className='comment-btn'>
+                      <button onClick={() => editComment(cmt.id)} className="comment-edit">수정</button>
+                      <button onClick={() => deleteComment(cmt.id)} className="comment-delete">삭제</button>
+                    </div>
+                  )}
+                </div>
+              </div>
               ))}
             </div>
             {/* 댓글 데이터처리 */}
@@ -307,7 +310,3 @@ const editComment = async (commentId) => {
 
 export default PostDetail;
 
-// useEffect(() => {
-//   console.log("현재 로그인한 사용자 ID:", userData?.nickname); // 현재 로그인한 사용자의 ID 출력
-//   console.log("게시글 작성자 ID:", post?.writer); // 게시글 작성자의 ID 출력
-// }, [userData, post]);

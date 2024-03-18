@@ -460,18 +460,36 @@ app.get('/api/posts/:postId/comments', (req, res) => {
   const { postId } = req.params;
 
   // const query = 'SELECT id, post_id, writer, content, created_at FROM comment WHERE post_id = ?';
-  const query =  `SELECT c.id, c.post_id, c.writer, c.content, c.created_at, u.nickname
-                  FROM comment c
-                  JOIN user u ON c.writer = u.username
-                  WHERE c.post_id = ?`;
+  const query = `
+      SELECT c.id, c.post_id, c.writer, c.content, c.created_at, u.nickname,
+            ui.IconID, ics.IconFile AS IconURL
+      FROM comment c
+      JOIN user u ON c.writer = u.username
+      LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
+      LEFT JOIN icon_shop ics ON ui.IconID = ics.IconID
+      WHERE c.post_id = ?
+    `;
+
   connection.query(query, [postId], (error, results) => {
       if (error) {
           console.error('댓글 불러오기 실패 :', error);
           return res.status(500).json({ message: '댓글 불러오기 실패 ' });
       }
-      res.json(results);
-  });
+
+    // 결과 매핑하여 아이콘 URL 없는 경우 기본 아이콘 URL 설정
+    const commentsWithIcon = results.map(comment => {
+      comment.IconURL = comment.IconURL;
+      return comment;
+    });
+
+    res.json(commentsWithIcon);
+    });
 });
+
+
+
+
+
 
 // Comment : 댓글 추가
 app.post('/api/posts/:postId/comments', (req, res) => {

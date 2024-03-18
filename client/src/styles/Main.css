@@ -346,8 +346,29 @@ td{
     margin-top: -15px; /* 필요에 따라 조정 */
   }
   .post-container img{
-    margin-right: 1px; /* 아이콘과 이름 사이의 간격 조정 */
+    margin-right: -10px; /* 아이콘과 이름 사이의 간격 조정 */
     width: 30px; /* 아이콘의 크기 조정, 필요에 따라 변경 */
     height: 30px; /* 아이콘의 크기 조정, 필요에 따라 변경 */
     border-radius: 50%; /* 아이콘의 테두리를 둥글게 */
+  }
+  .comment {
+    display: flex;
+    align-items: center; /* 세로축 중앙 정렬 */
+    margin-bottom: 10px; /* 댓글 간 간격 */
+  }
+  
+  .comment img {
+    width: 30px; /* 아이콘 크기 */
+    height: 30px; /* 아이콘 크기 */
+    border-radius: 50%; /* 원형 모양 */
+    margin-right: 10px; /* 아이콘과 이름 사이 간격 */
+    margin-bottom: 30px;
+  }
+  
+  .comment-writer {
+    margin-right: 20px; /* 이름과 내용 사이 간격 */
+  }
+  
+  .comment-content {
+    flex-grow: 1; /* 내용이 가로로 늘어나도록 설정 */
   }
