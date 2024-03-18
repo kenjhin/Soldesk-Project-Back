@@ -10,14 +10,13 @@ import '../styles/Post.css'
 import '../styles/PostDetail.css'
 
 
-
-
 const PostDetail = () => {
   const { userData } = useUser(); // 현재 로그인한 유저 정보 사용
   const textarea = useRef(); // 댓글 입력창 참조
   const location = useLocation();
   const navigate = useNavigate();
-  const post = location.state?.post;
+  const postData = location.state?.post; 
+  const [post, setPost] = useState(postData);
 
 
   // 조회수증가
@@ -25,8 +24,6 @@ const PostDetail = () => {
     const updatePostViews = async () => {
       try {
         await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
-          title: post.title, 
-          content: post.content, 
           views: post.views + 1 
         });
       } catch (error) {
@@ -36,14 +33,6 @@ const PostDetail = () => {
     
     updatePostViews();
 }, [post]);
-
-
-
-
-
-  useEffect(() => {
-    console.log("PostDetail 컴포넌트 마운트됨. post 객체:", post);
-  }, [post]);
   
 
   // 댓글 입력창 크기 자동 조절 함수
@@ -250,7 +239,7 @@ const editComment = async (commentId) => {
         <p className="post-content">{post?.content}</p>
       </div>
       <div className="post-footer">
-        <p className="post-like">♡좋아요 {post?.like}</p>
+      <p className='post-like' onClick={handleClickLikes}>♡좋아요 {post?.likes}</p>
         <p className="post-comment">
           댓글 {comment.filter((data) => data.postId === post?.id).length}
         </p>

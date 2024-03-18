@@ -54,6 +54,8 @@ const Board = () => {
           <tbody> 
           {currentPosts.map((post, index) => (
             <tr key={index}>
+            {console.log(boardId)}
+            {console.log(post)}
               <td className="td_id">{index + 1}</td> 
               <td className="td_title">
               <Link to={`/board/${post.boardId}/${post.id}`} state={{ post }}>
