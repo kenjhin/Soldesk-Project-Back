@@ -317,3 +317,58 @@ td{
         font-size: 18px;
     }
   }
+  .writer-container {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    
+  }
+  
+  .user-icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px; 
+    border-radius: 15px; 
+  }
+  
+  .td_writer {
+    display: flex;
+    align-items: center;
+    max-width: 200px; /* 최대 너비 설정 */
+    white-space: nowrap; /* 공백을 무시하고 한 줄에 표시 */
+    overflow: hidden; /* 넘치는 내용 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트를 말줄임표로 표시 */
+  }
+
+  .post-container{
+    display: flex;
+    align-items: center;
+    margin-top: -15px; /* 필요에 따라 조정 */
+  }
+  .post-container img{
+    margin-right: -10px; /* 아이콘과 이름 사이의 간격 조정 */
+    width: 30px; /* 아이콘의 크기 조정, 필요에 따라 변경 */
+    height: 30px; /* 아이콘의 크기 조정, 필요에 따라 변경 */
+    border-radius: 50%; /* 아이콘의 테두리를 둥글게 */
+  }
+  .comment {
+    display: flex;
+    align-items: center; /* 세로축 중앙 정렬 */
+    margin-bottom: 10px; /* 댓글 간 간격 */
+  }
+  
+  .comment img {
+    width: 30px; /* 아이콘 크기 */
+    height: 30px; /* 아이콘 크기 */
+    border-radius: 50%; /* 원형 모양 */
+    margin-right: 10px; /* 아이콘과 이름 사이 간격 */
+    margin-bottom: 30px;
+  }
+  
+  .comment-writer {
+    margin-right: 20px; /* 이름과 내용 사이 간격 */
+  }
+  
+  .comment-content {
+    flex-grow: 1; /* 내용이 가로로 늘어나도록 설정 */
+  }
