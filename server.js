@@ -82,7 +82,7 @@ app.get('/',  (req,res) => {
 
 
 
-// <POST> 회원가입 API
+// Register : 회원가입 API
 app.post('/signup', (req, res) => {
   // 요청 본문에서 데이터 추출
   const { username, password, confirmPassword, nickname, address, authority } = req.body;
@@ -91,9 +91,6 @@ app.post('/signup', (req, res) => {
   if (!username || !password || !confirmPassword || password !== confirmPassword) {
     return res.status(400).json({ error: '입력값이 올바르지 않습니다.' });
   }
-
-  // 기본 보유 아이콘목록
-  const default_ownedIcon = [0];
 
   // MySQL 회원가입 쿼리
   const query = `
@@ -119,10 +116,10 @@ app.post('/signup', (req, res) => {
 });
 
 
-// <Post> 로그인 API
+// Login : 로그인 기능
 app.post('/login', (req, res) => {
   // 역시 받아올 그릇들을 변수로 담는다.
-  const { username, password } = req.body;
+  const { username, password, stayLoggedIn } = req.body;
 
   // Mysql에서 사용자 이릅과 비밀번호를 확인하는 쿼리문.
   connection.query('SELECT * FROM user WHERE username = ? AND password = ?', [username, password], (error, results) => {
@@ -131,15 +128,17 @@ app.post('/login', (req, res) => {
       return res.status(500).json({ error: '로그인 중 오류가 발생했습니다.' });
     }
 
-    if (results.length > 0) {
-
-      // 로그인 성공시 쿠키설정 => ##세션 기능만 사용하려고 주석처리 했습니다.
-      // res.cookie('isLoggedIn', true, { httpOnly: true });
-      // res.cookie('username', username, { httpOnly: true });
+    if (results.length > 0) { 
 
       // DB와 데이터가 일치하면 세션을 부여(true)
       req.session.isLoggedIn = true;
       req.session.username = username;
+
+     // 체크박스 세션유지 기능 추가 
+    if (stayLoggedIn) {
+  
+        req.session.cookie.maxAge = 2 * 60 * 60 * 1000; // 체크박스 클릭후 로그인시 2시간 세션 연장
+      }
 
       // 리다이렉트와 세션 정보를 클라이언트에 응답
       return res.status(200).json({ success: true, userInfo: results[0], message: '로그인 성공', redirectPath: '/' });
@@ -150,7 +149,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// <GET> 로그인/비로그인 체크 API
+// Login : 세션을 이용한 로그인/비로그인 체크 기능
 app.get('/checkSession', (req, res) => {
   if (req.session && req.session.isLoggedIn) {
     // 세션 존재: 로그인 상태
@@ -162,8 +161,7 @@ app.get('/checkSession', (req, res) => {
 });
 
 
-
-
+// Login : 로그아웃 기능
 app.post('/logout', (req, res) => {
   if (req.session) {
     req.session.destroy(err => {
@@ -179,6 +177,7 @@ app.post('/logout', (req, res) => {
 });
 
 
+// UserData : 유저 데이터 받아오기 기능
 app.get('/userData', (req, res) => {
   if (req.session && req.session.isLoggedIn) {
     // 세션 확인: 로그인 상태
@@ -205,6 +204,8 @@ app.get('/userData', (req, res) => {
   }
 });
 
+
+// UserData : 유저 정보 수정 기능 
 app.put('/updateMyInfo', (req, res) => {
   const userInfo = req.body;
 
@@ -225,7 +226,7 @@ app.put('/updateMyInfo', (req, res) => {
 });
 
 
-
+// UserData : 유저(친구) 정보 받아오기 기능
 app.get('/userFriends', async (req, res) => {
   if (!req.session.username) {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
@@ -260,6 +261,8 @@ app.get('/userFriends', async (req, res) => {
   }
 });
 
+
+// UserData : 
 app.get('/users/nickname', (req, res) => {
   // DB에서 user_friends 테이블값 중에 user_id가 나인 것만
   const selectQuery = 'SELECT nickname FROM user';
@@ -273,6 +276,8 @@ app.get('/users/nickname', (req, res) => {
   });
 });
 
+
+// UserData : 유저 프로필 메세지 설정 기능
 app.put('/profileMessage', (req, res) => {
   const { profileMessage, username } = req.body;
 
@@ -289,7 +294,7 @@ app.put('/profileMessage', (req, res) => {
 });
 
 
-// 게시물 작성 POST
+// Post : 게시물 작성 POST
 app.post('/api/posts', (req, res) => {
   const { title, content, boardId, writerId } = req.body;
 
@@ -315,22 +320,36 @@ app.post('/api/posts', (req, res) => {
 });
 
 
-// 게시물 리스트 가져오기 GET
+// Post : 게시글 리스트 불러오기 기능
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT id, board_id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
+  const query = `
+    SELECT p.id, p.board_id, p.title, p.user_id, p.content, p.writer, p.created_at, p.views, p.likes, ui.IconID, ics.IconFile AS IconURL
+    FROM post p
+    JOIN user u ON p.user_id = u.username
+    LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
+    LEFT JOIN icon_shop ics ON ui.IconID = ics.IconID
+    WHERE p.board_id = ?
+    ORDER BY p.created_at ASC
+  `;
+  
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
       return res.status(500).json({ message: 'Error fetching posts' });
     }
 
-    res.json(results);
+    res.json(results.map(post => {
+      // IconURL이 없는 경우 기본 아이콘 URL 설정 (옵션)
+      post.IconURL = post.IconURL;
+      return post;
+    }));
   });
 });
 
-// 게시물 홈화면에 좋아요 순으로 표시
+
+// Post : 홈화면에 좋아요 순으로 게시글 표시 기능
 app.get('/api/posts/likes', (req, res) => {
   const query = 'SELECT * FROM post ORDER BY likes DESC';
   connection.query(query, (error, results) => {
@@ -343,7 +362,7 @@ app.get('/api/posts/likes', (req, res) => {
 });
 
 
-// <PUT> 게시판 수정 API
+// Post : 게시판 수정 기능
 app.put('/api/posts/:id', (req, res) => {
   const { id } = req.params; // URL에서 게시물 ID 추출
   const { title, content, likes, views } = req.body; // 수정시 본문에서 제목과 내용 추출 / 좋아요 눌렀을 때 / 게시물열릴때
@@ -416,11 +435,7 @@ app.put('/api/posts/:id', (req, res) => {
 });
 
 
-
-
-
-
-// <DELETE> 게시물 삭제하기 
+// Post : 게시물 삭제기능 
 app.delete('/api/posts/:id', (req, res) => {
   const { id } = req.params; // URL에서 게시물 ID 추출
 
@@ -440,7 +455,7 @@ app.delete('/api/posts/:id', (req, res) => {
 });
 
 
-// 댓글 목록 불러오기
+// Comment : 댓글 목록 불러오기
 app.get('/api/posts/:postId/comments', (req, res) => {
   const { postId } = req.params;
 
@@ -458,7 +473,7 @@ app.get('/api/posts/:postId/comments', (req, res) => {
   });
 });
 
-// 댓글 추가
+// Comment : 댓글 추가
 app.post('/api/posts/:postId/comments', (req, res) => {
   // console.log("Received request body:", req.body);
   const { postId } = req.params;
@@ -474,7 +489,7 @@ app.post('/api/posts/:postId/comments', (req, res) => {
   }); 
 });
 
-// 댓글 삭제하기
+// Comment : 댓글 삭제하기
 app.delete('/api/comments/:commentId', (req, res) => {
 
   const { commentId } = req.params;
@@ -492,7 +507,7 @@ app.delete('/api/comments/:commentId', (req, res) => {
   });
 });
 
-// 댓글 수정
+// Comment : 댓글 수정
 app.put('/api/comments/:commentId', (req, res) => {
   const { commentId } = req.params;
   const { content } = req.body;
@@ -515,7 +530,7 @@ app.put('/api/comments/:commentId', (req, res) => {
 });
 
 
-// 채팅 가져오기 GET
+// Chat : 채팅 가져오기 GET
 app.get('/chatData', (req, res) => {
   const username = req.session.username;
 
@@ -530,7 +545,7 @@ app.get('/chatData', (req, res) => {
   });
 });
 
-// 채팅 DB로 보내기
+// Chat : 채팅 DB로 보내기
 app.post('/chat/send', (req, res) => {
   const { senderId, receiverId, content } = req.body;
 
@@ -555,7 +570,7 @@ app.post('/chat/send', (req, res) => {
   });
 });
 
-// 친추 받아오기
+// Friend : 친추 받아오기
 app.get('/friendRequest/receive', (req, res) => {
   const username = req.session.username;
 
@@ -583,7 +598,7 @@ app.get('/friendRequest/receive', (req, res) => {
   });
 });
 
-// 내가 보낸 친구요청(이미 친추 보낸 상대에겐 친추 못보내게)
+// Friend : 내가 보낸 친구요청(이미 친추 보낸 상대에겐 친추 못보내게)
 app.get('/friendRequest/myRequest', (req, res) => {
   const username = req.session.username;
 
@@ -604,7 +619,7 @@ app.get('/friendRequest/myRequest', (req, res) => {
   });
 });
 
-// 친추 보내기
+// Friend : 친추 보내기
 app.post('/friendRequest/send', (req, res) => {
   const { senderId, receiverNickname } = req.body;
 
@@ -630,6 +645,7 @@ app.post('/friendRequest/send', (req, res) => {
   });
 });
 
+// Friend : 친구요청 수락 기능
 app.put('/friendRequest/accept', (req, res) => {
   const { requestId } = req.body;
 
@@ -668,6 +684,7 @@ app.put('/friendRequest/accept', (req, res) => {
   });
 });
 
+// Friend : 친구요청 거절 기능
 app.put('/friendRequest/reject', (req, res) => {
   const { requestId } = req.body;
 
@@ -684,23 +701,23 @@ app.put('/friendRequest/reject', (req, res) => {
   });
 });
 
-// 아이콘 Update
-app.put('/icon/set', (req, res) => {
-  const { currentIcon, username } = req.body;
+// // Icon :  Update
+// app.put('/icon/set', (req, res) => {
+//   const { currentIcon, username } = req.body;
 
-  const updateQuery = 'UPDATE user SET current_icon = ? WHERE username = ?';
-  connection.query(updateQuery, [currentIcon, username], (updateError, results) => {
-    if (updateError) {
-      console.error('Update currentIcon error:', updateError);
-      return res.status(500).json({ message: 'Update currentIcon error' });
-    }
+//   const updateQuery = 'UPDATE user SET current_icon = ? WHERE username = ?';
+//   connection.query(updateQuery, [currentIcon, username], (updateError, results) => {
+//     if (updateError) {
+//       console.error('Update currentIcon error:', updateError);
+//       return res.status(500).json({ message: 'Update currentIcon error' });
+//     }
 
-    // 최종 결과 반환
-    res.json(results);
-  });
-});
+//     // 최종 결과 반환
+//     res.json(results);
+//   });
+// });
 
-// Admin 아이콘 업로드 API
+// Icon : Admin 아이콘 업로드 기능
 app.post('/upload-icon', upload.single('iconFile'), (req, res) => {
   const { iconName, iconPrice } = req.body;
   const iconFile = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
@@ -722,7 +739,8 @@ app.post('/upload-icon', upload.single('iconFile'), (req, res) => {
   }
 });
 
-// 아이콘 스토어 LIST
+
+// Icon : 아이콘 스토어 리스트 기능
 app.get('/api/icons', (req, res) => {
   try {
     // 데이터베이스에서 아이콘 목록을 조회
@@ -740,7 +758,8 @@ app.get('/api/icons', (req, res) => {
   }
 });
 
-// 아이콘스토어 구매요청
+
+// Icon : 아이콘 스토어 구매 요청 기능
 app.post('/api/purchase', (req, res) => {
   const { userId, iconId } = req.body;
 
@@ -825,7 +844,7 @@ app.post('/api/purchase', (req, res) => {
 
 
 
-// 사용자의 아이콘 목록 조회 API
+// Icon : 사용자의 보유 아이콘 조회 기능
 app.get('/api/user-icons/:userId', (req, res) => {
   // URL 경로로부터 userId를 추출하기.
   const { userId } = req.params;
@@ -852,7 +871,7 @@ app.get('/api/user-icons/:userId', (req, res) => {
 
 
 
-// 현재 아이콘 선택 함수.
+// Icon : 유저 현재 아이콘 설정 기능.
 app.post('/api/user-icons/set-current/:userId', (req, res) => {
   const userId = req.params.userId; // URL에서 사용자 ID를 가져옵니다.
   const { iconId } = req.body; // 요청 본문에서 아이콘 ID를 가져옵니다.
@@ -882,19 +901,6 @@ app.post('/api/user-icons/set-current/:userId', (req, res) => {
     });
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

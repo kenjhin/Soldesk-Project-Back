@@ -226,7 +226,10 @@ const editComment = async (commentId) => {
     <div className="postBox">
       <div className="post-header">
         <h2 className="post-title">{post?.title}</h2>
-        <p className="post-writer">{post?.writer}</p>
+        <div className="post-container">
+          <img src={post.IconURL} alt="UserIcon" />
+          <p className="post-writer">{post?.writer}</p>
+        </div> 
         <p className="post-date">{formatDate(post.created_at, "post")}</p>
         <p className="post-views">조회 {post?.views}</p>
       </div>
