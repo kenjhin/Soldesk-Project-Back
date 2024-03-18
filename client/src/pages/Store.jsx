@@ -64,20 +64,24 @@ function Store() {
     <div className='icon-shop-banner'>
       <p>아이콘스토어</p>
     </div>
-      <div className='icons-list'>
-        {icons.length === 0 ? (
-          <p>로딩 중...</p>
-        ) : (
-          icons.map((icon) => (
-            <div key={icon.id} className='icon-item'> {/* key 추가 */}
-              <img src={icon.iconFile} alt={icon.IconName} style={{ width: '100px', height: '100px' }} />
-              <p>{icon.IconName}</p>
-              <p>{Math.round(icon.iconPrice)} 포인트</p>
-              <button className="button-buy" onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
-            </div>
-          ))
-        )}
+    <div className='icons-list'>
+  {icons.length === 0 ? (
+    <p>로딩 중...</p>
+  ) : (
+    icons.map((icon) => (
+      <div key={icon.id} className='icon-item'>
+        <div className='icon-cover' onMouseEnter={() => {}} onMouseLeave={() => {}}>
+          <img src={icon.iconFile} alt={icon.IconName} />
+          <div className="icon-name-overlay">
+            <div>{icon.IconName}</div>
+            <div>{Math.round(icon.iconPrice)} 포인트</div>
+            <button className="button-buy" onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
+          </div>
+        </div>
       </div>
+    ))
+  )}
+</div>
     </div>
   );
 }

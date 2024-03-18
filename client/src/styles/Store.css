@@ -1,4 +1,4 @@
-App 전체 배경 및 텍스트 색상 조정
+/* App 전체 배경 및 텍스트 색상 조정 */
 body {
   background-color: #000; /* 배경을 검은색으로 설정 */
   color: #b5a642; /* 골드 색상의 텍스트 */
@@ -6,109 +6,119 @@ body {
 }
 
 .store-container {
-  max-width: 1400px; /* 가로 너비 확장 */
+  max-width: 1400px;
   margin: auto;
   padding: 20px;
 }
 
 .My-Point {
-  background-color: #333; /* 어두운 배경에 어울리는 색상 */
-  color: #ffd700; /* 골드 색상 */
+  background-color: #333;
+  color: #ffd700;
   padding: 10px 20px;
   margin-bottom: 20px;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4); /* 골드 색상의 그림자 */
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .icons-list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 아이콘 가로로 5개 배열 */
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
 }
 
 .icon-item {
-  background-color: #222; /* 어두운 배경에 어울리는 색상 */
-  color: #ffd700; /* 골드 색상의 텍스트 */
+  background-color: #222;
+  color: #ffd700;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 초기 그림자 */
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
   text-align: center;
   transition: transform 0.3s ease-in-out;
-  animation: shine 1s infinite alternate; /* 지속 시간을 1초로 조정 */
+  min-height: 250px;
+  width: calc((100% - 60px) / 4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; 
 }
 
-@keyframes shine {
-  0%, 100% {
-    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
-  }
-  10%, 90% {
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-  }
-  20%, 80% {
-    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
-  }
-  30%, 70% {
-    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
-  }
-  40%, 60% {
-    box-shadow: 0 4px 25px rgba(255, 215, 0, 0.6);
-  }
-  50% {
-    box-shadow: 0 4px 30px rgba(255, 215, 0, 0.7);
-  }
-}
-
-.StoreAdminBtn {
-  background-color: #b5a642; /* 골드 색상 */
-  color: #000;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-}
-
-.StoreAdminBtn:hover {
-  background-color: #d4af37; /* 골드 색상을 더 밝게 */
-}
-
-.icon-shop-banner {
-  background-color: #222; /* 어두운 배경 */
-  color: #ffd700; /* 골드 색상의 텍스트 */
-  padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 골드 색상의 그림자 */
-  width: 100%; /* 배너 너비 확장 */
-}
-
-.icon-shop-banner p {
-  margin: 0;
-  font-size: 3rem; /* 텍스트 사이즈 증가 */
-  font-weight: bold;
-  text-transform: uppercase; /* 대문자 변환 */
-  letter-spacing: 5px; /* 글자 간격 확장 */
-}
-
-.button-buy {
-  background-color: #b5a642; /* 기본 골드 색상 */
+.StoreAdminBtn, .button-buy {
+  background-color: #b5a642;
   color: #000;
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out; /* 부드러운 전환 효과 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 초기 그림자 */
-  transform: scale(1); /* 초기 크기 */
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
-.button-buy:hover {
-  background-color: #ffd700; /* 마우스 오버 시 더 밝은 골드 */
-  color: #222;
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4); /* 마우스 오버 시 그림자 강조 */
-  transform: scale(1.05); /* 마우스 오버 시 약간 크기 증가 */
+.StoreAdminBtn:hover, .button-buy:hover {
+  background-color: #d4af37;
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.icon-shop-banner {
+  background-color: #222;
+  color: #ffd700;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+  width: 100%;
+}
+
+.icon-shop-banner p {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+}
+
+.icon-cover {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.icon-cover img {
+  width: 100%; /* 컨테이너 너비에 맞게 조정 */
+  height: 100%; /* 컨테이너 높이에 맞게 조정 */
+  object-fit: cover; /* 컨테이너를 꽉 채우면서 비율 유지 */
+  border-radius: 4px; /* 이미지 모서리를 둥글게 */
+}
+
+.icon-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  color: #fff;
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 내용을 정렬 */
+  justify-content: center;
+  align-items: center; /* 가운데 정렬 */
+  transform: translateY(100%); /* 오버레이를 아이템 아래로 이동 */
+  opacity: 0; /* 처음에는 투명하게 */
+  transition: transform 0.3s ease, opacity 0.3s ease; /* 부드러운 전환 효과 */
+  gap: 10px; /* 요소 사이의 간격 */
+}
+
+.button-buy {
+  /* 기존 스타일 유지 및 필요한 경우 추가 스타일 */
+  padding: 10px 20px; /* 버튼의 패딩 조정 */
+  font-size: 1rem; /* 버튼의 폰트 사이즈 조정 */
+  /* 추가 스타일 */
+}
+
+.icon-cover:hover .icon-name-overlay {
+  transform: translateY(0); /* 마우스를 올리면 오버레이를 위로 */
+  opacity: 1; /* 오버레이를 불투명하게 */
 }

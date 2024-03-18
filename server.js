@@ -214,9 +214,9 @@ app.get('/userFriends', async (req, res) => {
   const username = req.session.username;
 
   try {
-    // 유저 친구 정보 및 각 친구의 현재 아이콘 정보 조회
+    // 유저 친구 정보 및 각 친구의 현재 아이콘 정보, 그룹 이름 조회
     const selectQuery = `
-    SELECT uf.friend_id, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL
+    SELECT uf.friend_id, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL, uf.group_name
     FROM user_friends uf
     JOIN user u ON uf.friend_id = u.username
     LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
@@ -225,13 +225,13 @@ app.get('/userFriends', async (req, res) => {
     `;
 
     const [friendResults] = await connection.promise().query(selectQuery, [username]);
-    // console.log(friendResults)
     // 결과 응답 (아이콘 URL이 없는 경우 기본 아이콘 사용)
     res.json(friendResults.map(friend => ({
       friendId: friend.friend_id,
       nickname: friend.nickname,
       profileMessage: friend.profile_message,
-      iconURL: friend.IconURL  // 기본 아이콘 경로 설정
+      iconURL: friend.IconURL,  // 기본 아이콘 경로 설정
+      group_name: friend.group_name // 그룹 이름 추가
     })));
   } catch (error) {
     console.error('DB 조회 오류:', error);

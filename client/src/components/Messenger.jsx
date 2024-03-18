@@ -4,10 +4,11 @@ import addPerson from "../assets/img/messenger/add_person_mask.png";
 import addFolder from "../assets/img/messenger/add_folder_mask.png";
 import search from "../assets/img/messenger/search_mask.png";
 import sort from "../assets/img/messenger/sort_mask.png";
-import defaultIcon from "../assets/img/hamster.jpg"
 import ChatModal from './modals/ChatModal';
 import getCurrentDateTime from './function/getCurrentDateTime';
 import AddFriendModal from './modals/AddFriendModal';
+import defaultIcon from '../assets/img/icons/Default.jpg';
+
 
 import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
@@ -175,7 +176,7 @@ const Messenger = () => {
               .map((friends, j) => (
                 <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-                    <img src={friends.iconURL} alt='friend-icon' />
+                    <img src={friends.iconURL || defaultIcon} alt='friend-icon' />
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>
