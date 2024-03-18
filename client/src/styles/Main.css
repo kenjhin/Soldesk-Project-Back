@@ -241,3 +241,16 @@ td{
     -ms-overflow-style: none; /* IE, Edge */
     scrollbar-width: none; /* Firefox */
   }
+  .RpBox {
+    border-left: 5px solid #1C1C1C; /* 좌측 테두리 */
+    padding: 20px;
+    display: flex;
+    margin: 1px;
+  }
+  .RpBox div{
+    margin: 2px;
+  }
+  .RpBoxFont {
+    color: #CDBE91;
+    font-weight: 900;
+  }

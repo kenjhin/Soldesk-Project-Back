@@ -1,9 +1,10 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from 'react'
 import axios from 'axios';
+import defaultIcon from '../../assets/img/icons/Default.jpg';
 
 const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userData, setUserData, 
-                    currentChat, setCurrentChat, icons, userFriends}) => {
+                    currentChat, setCurrentChat,  userFriends}) => {
   const scrollRef = useRef();
   const prevScrollHeight = useRef();
 
@@ -111,7 +112,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
               <div key={i} className='chat-list' onClick={() => setChatTarget(userFriends.find(data => data.friendId === friend.friendId))}>
                 <div className='chat-friend-icon'>
                   {/* 아이콘 출력 방식 변경 */}
-                  <img src={userFriends.find(data => data.friendId === friend.friendId)?.iconURL || 'defaultIconPath'} alt='' />
+                  <img src={userFriends.find(data => data.friendId === friend.friendId)?.iconURL || defaultIcon} alt='' />
                 </div>
                 <div className='chat-info'>
                   <span className='chat-friend-nickname'>
@@ -130,7 +131,7 @@ const ChatModal = ({onHide, myChat, setMyChat, chatTarget, setChatTarget, userDa
             <div className='chat-header'>
               <div className='chat-friend'>
                 <div className='chat-friend-icon'>
-                  <img src={chatTarget.iconURL} alt='friend-icon' />
+                  <img src={chatTarget.iconURL || defaultIcon} alt='friend-icon' />
                 </div>
                 <span className='chat-friend-nickname'>
                   {chatTarget.nickname}

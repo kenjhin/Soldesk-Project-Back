@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState } from 'react'
 import FriendRequestModal from './modals/FriendRequestModal';
 import '../styles/FriendRequest.css'
