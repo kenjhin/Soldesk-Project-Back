@@ -299,7 +299,7 @@ app.post('/api/posts', (req, res) => {
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
-  const query = 'SELECT id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
+  const query = 'SELECT id, board_id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
     if (error) {
       console.error('Fetch posts error:', error);
