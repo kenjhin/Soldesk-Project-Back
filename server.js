@@ -424,7 +424,6 @@ app.delete('/api/posts/:id', (req, res) => {
 app.get('/api/posts/:postId/comments', (req, res) => {
   const { postId } = req.params;
 
-  // const query = 'SELECT id, post_id, writer, content, created_at FROM comment WHERE post_id = ?';
   const query =  `SELECT c.id, c.post_id, c.writer, c.content, c.created_at, u.nickname
                   FROM comment c
                   JOIN user u ON c.writer = u.username
