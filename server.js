@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -204,6 +204,26 @@ app.get('/userData', (req, res) => {
     res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
   }
 });
+
+app.put('/updateMyInfo', (req, res) => {
+  const userInfo = req.body;
+
+  const query = 'UPDATE user SET password = ?, nickname = ?, address = ? WHERE username = ?';
+
+  connection.query(query, [userInfo.password, userInfo.nickname, JSON.stringify(userInfo.address), userInfo.username], (error, results) => {
+    if (error) {
+      console.error('Error updating user info:', error);
+      return res.status(500).json({ message: '사용자 정보 업데이트 중 오류가 발생했습니다.' });
+    }
+
+    if (results.affectedRows > 0) {
+      res.json({ message: '사용자 정보가 성공적으로 업데이트되었습니다.' });
+    } else {
+      res.status(404).json({ message: '업데이트할 사용자 정보를 찾을 수 없습니다.' });
+    }
+  });
+});
+
 
 
 app.get('/userFriends', async (req, res) => {
