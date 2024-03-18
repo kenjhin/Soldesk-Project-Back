@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import FriendRequestModal from './modals/FriendRequestModal';
 import '../styles/FriendRequest.css'
+import axios from 'axios';
 
-const FriendRequests = ({friendRequest, setFriendRequest}) => {
+const FriendRequests = ({friendRequest, setFriendRequest, userFriends}) => {
   const [modalShow, setModalShow] = useState(false);
 
   const handleOnClick = () => {
@@ -18,6 +19,7 @@ const FriendRequests = ({friendRequest, setFriendRequest}) => {
             <span className='friend-request-text'>친구 요청</span>
             <div className='count-container'>
               <span className='friend-request-count'>{`${friendRequest.length}`}</span>
+              {console.log(friendRequest)}
             </div>
           </>
         
@@ -29,6 +31,7 @@ const FriendRequests = ({friendRequest, setFriendRequest}) => {
             onClose={() => setModalShow(false)}
             friendRequest={friendRequest}
             setFriendRequest={setFriendRequest}
+            userFriends={userFriends}
           />
         )}
     </div>

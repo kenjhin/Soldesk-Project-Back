@@ -3,7 +3,7 @@ import React from 'react'
 import '../../styles/FriendRequest.css'
 import check from '../../assets/img/messenger/check_mask.png'
 import x from '../../assets/img/messenger/x_mask.png'
-const FriendRequestModal = ({show, onClose, friendRequest, setFriendRequest}) => {
+const FriendRequestModal = ({show, onClose, friendRequest, setFriendRequest, userFriends}) => {
 
   const handleAcceptFriendRequest = async (requestId) => {
     try {
@@ -34,7 +34,6 @@ const FriendRequestModal = ({show, onClose, friendRequest, setFriendRequest}) =>
             <span className='close' onClick={onClose}>&times;</span>
         </div>
         <div className='request-header-box'>
-          {console.log(friendRequest)}
           <span>친구 요청{friendRequest.length!== 0 && `(${friendRequest.length})`}</span>
         </div>
         <div className='request-body-container'>
@@ -42,7 +41,8 @@ const FriendRequestModal = ({show, onClose, friendRequest, setFriendRequest}) =>
         data.status === 'awaiting'&& 
           <div key={i} className='request-list-container'>
             <div className='request-userIcon-box'>
-              <img src={x} alt=''/>
+              <img src={data.iconURL} alt=''/>
+              {console.log(data)}
             </div>
             <div className='request-userInfo-container'>
               {/* <img src={} alt=''/> */}

@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
@@ -216,7 +216,11 @@ app.get('/userFriends', async (req, res) => {
   try {
     // 유저 친구 정보 및 각 친구의 현재 아이콘 정보, 그룹 이름 조회
     const selectQuery = `
+<<<<<<< HEAD
     SELECT uf.friend_id, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL, uf.group_name
+=======
+    SELECT uf.friend_id, uf.group_name, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL
+>>>>>>> dd9ad642c177b6b0a99a17e17174e3168cda5bd7
     FROM user_friends uf
     JOIN user u ON uf.friend_id = u.username
     LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
@@ -227,6 +231,7 @@ app.get('/userFriends', async (req, res) => {
     const [friendResults] = await connection.promise().query(selectQuery, [username]);
     // 결과 응답 (아이콘 URL이 없는 경우 기본 아이콘 사용)
     res.json(friendResults.map(friend => ({
+      groupName: friend.group_name,
       friendId: friend.friend_id,
       nickname: friend.nickname,
       profileMessage: friend.profile_message,
@@ -463,10 +468,18 @@ app.post('/chat/send', (req, res) => {
 app.get('/friendRequest/receive', (req, res) => {
   const username = req.session.username;
 
+  // const selectQuery = `
+  //   SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname 
+  //   FROM friend_requests fr 
+  //   INNER JOIN user u ON fr.sender_id = u.username 
+  //   WHERE fr.receiver_id = ? AND fr.status = 'awaiting'
+  // `;
   const selectQuery = `
-    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname 
+    SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, u.nickname, ui.IconId, ics.IconFile AS iconURL
     FROM friend_requests fr 
     INNER JOIN user u ON fr.sender_id = u.username 
+    LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.IsCurrent = 1
+    LEFT JOIN icon_shop ics ON ui.IconID = ics.IconID
     WHERE fr.receiver_id = ? AND fr.status = 'awaiting'
   `;
   connection.query(selectQuery, [username], (error, results) => {
