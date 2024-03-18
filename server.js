@@ -420,6 +420,77 @@ app.delete('/api/posts/:id', (req, res) => {
 });
 
 
+// 댓글 목록 불러오기
+app.get('/api/posts/:postId/comments', (req, res) => {
+  const { postId } = req.params;
+
+  const query = 'SELECT * FROM comment WHERE post_id = ?';
+  connection.query(query, [postId], (error, results) => {
+      if (error) {
+          console.error('댓글 불러오기 실패 :', error);
+          return res.status(500).json({ message: '댓글 불러오기 실패 ' });
+      }
+      res.json(results);
+  });
+});
+
+// 댓글 추가
+app.post('/api/posts/:postId/comments', (req, res) => {
+  // console.log("Received request body:", req.body);
+  const { postId } = req.params;
+  const { writer, content } = req.body;
+
+  const query = 'INSERT INTO comment (post_id, writer, content) VALUES (?, ?, ?)';
+  connection.query(query, [postId, writer, content], (error, results) => { 
+      if (error) {
+          console.error('댓글 추가 중 에러:', error);
+          return res.status(500).json({ message: '댓글 추가 실패' });
+      }
+      res.status(201).json({ message: '댓글 추가 성공', commentId: results.insertId });
+  }); 
+});
+
+// 댓글 삭제하기
+app.delete('/api/comments/:commentId', (req, res) => {
+
+  const { commentId } = req.params;
+
+  const query = 'DELETE FROM comment WHERE id = ?';
+  connection.query(query, [commentId], (error, results) => {
+    if (error) {
+      console.error("댓글 삭제 중 오류 발생:", error);
+      res.status(500).json({ message: "댓글 삭제에 실패했습니다." });
+    } else if (results.affectedRows === 0) {
+      res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
+    } else {
+      res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
+    }
+  });
+});
+
+// 댓글 수정
+app.put('/api/comments/:commentId', (req, res) => {
+  const { commentId } = req.params;
+  const { content } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ message: "댓글 내용을 입력해주세요." });
+  }
+
+  const query = 'UPDATE comment SET content = ? WHERE id = ?';
+  connection.query(query, [content, commentId], (error, results) => {
+    if (error) {
+      console.error("댓글 수정 중 오류 발생:", error);
+      return res.status(500).json({ message: "댓글 수정에 실패했습니다." });
+    } else if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "해당 댓글을 찾을 수 없습니다." });
+    } else {
+      return res.status(200).json({ message: "댓글이 성공적으로 수정되었습니다." });
+    }
+  });
+});
+
+
 // 채팅 가져오기 GET
 app.get('/chatData', (req, res) => {
   const username = req.session.username;
