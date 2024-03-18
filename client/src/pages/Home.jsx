@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, {  useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,6 +8,7 @@ import "../styles/App.css";
 // img
 import storeIco from "../assets/img/home/nav-icon-store.png";
 import inventoryIco from "../assets/img/home/nav-icon-collections.png";
+import RpIco from "../assets/img/icon-rp-24.png";
 // user_icon
 import icon_hamster from "../assets/img/icons/hamster.jpg";
 import icon_challenger from "../assets/img/icons/challenger.jpg";
@@ -110,6 +112,10 @@ function Home({setLogined}) {
               <img src={storeIco} alt="/store" />
             </button>     
             </Link>
+          </div>
+          <div className="RpBox">
+            <div><img src={RpIco}/></div>
+            <div className="RpBoxFont">{userData.point}</div>
           </div>
         </div>
         <div className="headerProfileBox">

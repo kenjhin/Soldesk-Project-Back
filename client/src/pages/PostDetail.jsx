@@ -20,20 +20,17 @@ const PostDetail = () => {
   const post = location.state?.post;
 
 
-  // 조회수증가
+// 조회수증가
   useEffect(() => {
     const updatePostViews = async () => {
       try {
         await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
-          title: post.title, 
-          content: post.content, 
           views: post.views + 1 
         });
       } catch (error) {
           console.error('조회수 업데이트 중 오류 발생:', error);
       }
     };
-    
     updatePostViews();
 }, [post]);
 
@@ -218,8 +215,7 @@ const editComment = async (commentId) => {
 };
 
 
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
+  
   const handleClickLikes = () => {
     const like = post.likes + 1;
     setPost({...post, likes: like});
@@ -235,8 +231,8 @@ const editComment = async (commentId) => {
         console.error('좋아요 수정 오류 발생:', error);
     }
   };
-////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
   return (
     <div className="postBox">

@@ -176,11 +176,7 @@ const Messenger = () => {
               .map((friends, j) => (
                 <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-<<<<<<< HEAD
                     <img src={friends.iconURL || defaultIcon} alt='friend-icon' />
-=======
-                    <img src={friends.iconURL} alt='friend-icon'/>
->>>>>>> dd9ad642c177b6b0a99a17e17174e3168cda5bd7
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>

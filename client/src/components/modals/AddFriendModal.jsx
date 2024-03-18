@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState } from 'react';
 import '../../styles/AddFriendModal.css'
 import axios from 'axios';

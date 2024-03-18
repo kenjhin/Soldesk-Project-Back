@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'root',
-    password : '5842',
+    user     : 'soldesk',
+    password : '1234',
     database : 'soldesk'
   });
 
@@ -216,11 +216,7 @@ app.get('/userFriends', async (req, res) => {
   try {
     // 유저 친구 정보 및 각 친구의 현재 아이콘 정보, 그룹 이름 조회
     const selectQuery = `
-<<<<<<< HEAD
     SELECT uf.friend_id, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL, uf.group_name
-=======
-    SELECT uf.friend_id, uf.group_name, u.nickname, u.profile_message, ui.IconID, ics.IconFile AS IconURL
->>>>>>> dd9ad642c177b6b0a99a17e17174e3168cda5bd7
     FROM user_friends uf
     JOIN user u ON uf.friend_id = u.username
     LEFT JOIN user_icons ui ON u.id = ui.UserID AND ui.isCurrent = 1
