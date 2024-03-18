@@ -115,7 +115,7 @@ function Home({setLogined}) {
           </div>
           <div className="RpBox">
             <div><img src={RpIco}/></div>
-            <div className="RpBoxFont">{userData.point}</div>
+            {userData && <div className="RpBoxFont">{userData.point}</div>}
           </div>
         </div>
         <div className="headerProfileBox">
