@@ -50,56 +50,55 @@ function Store() {
   };
 
   return (
-    <div className='store-container'>
-      {/* 관리자일 경우 아이콘 스토어 관리 버튼 표시 */}
-      <div className="store-top-right"> {/* 새로운 컨테이너 추가 */}
-        {userData && userData.authority === 'admin' && (
-          <div className="StoreAdminHandle">
-            <Link to="/icon-store-manager">
-              <button className='StoreAdminBtn'>아이콘 스토어 관리</button>
-            </Link>
-          </div>
-        )}
-        <div className='My-Point'>
-        <h1>RP</h1>
-
-        {userData ? (
-          <>
-            <img src={pointIcon} alt="RP" style={{ verticalAlign: 'middle', marginRight: '5px' }}/>
-            <span>{userData.point}</span>
-          </>
-          ) : '포인트를 불러오는 중...'}
-          {/* RP 충전 버튼 추가 */}
-          <button className='Point-Charge' 
-          onClick={() => alert('RP 충전 페이지로 이동합니다.')}>RP 충전</button>  
-        </div>
-        
-      </div>
-      
-      <div className='Store-Slide'>
-        <StoreSlied/>
-      </div>
-    <div className="icon-shop-title">아이콘 상점</div> {/* 이름표 추가 */}
-    <div className='icons-list'>
-  {icons.length === 0 ? (
-    <p>로딩 중...</p>
-  ) : (
-    icons
-      .filter((icon) => icon.IconID < 1 || icon.IconID > 17) // ID가 1에서 17 사이가 아닌 아이콘만 표시
-      .map((icon) => (
-        <div key={icon.id} className='icon-item'>
-          <div className='icon-cover' onMouseEnter={() => {}} onMouseLeave={() => {}}>
-            <img src={icon.iconFile} alt={icon.IconName} />
-            <div className="icon-name-overlay">
-              <div>{icon.IconName}</div>
-              <div>{Math.round(icon.iconPrice)} 포인트</div>
-              <button className="button-buy" onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
+    <div className='store'>
+      <div className='store-container'>
+        {/* 관리자일 경우 아이콘 스토어 관리 버튼 표시 */}
+        <div className="store-top-right"> {/* 새로운 컨테이너 추가 */}
+          {userData && userData.authority === 'admin' && (
+            <div className="StoreAdminHandle">
+              <Link to="/icon-store-manager">
+                <button className='StoreAdminBtn'>아이콘 스토어 관리</button>
+              </Link>
             </div>
+          )}
+          <div className='My-Point'>
+          <h1>RP</h1>
+          {userData ? (
+            <>
+              <img src={pointIcon} alt="RP" style={{ verticalAlign: 'middle', marginRight: '5px' }}/>
+              <span>{userData.point}</span>
+            </>
+            ) : '포인트를 불러오는 중...'}
+            {/* RP 충전 버튼 추가 */}
+            <button className='Point-Charge' 
+            onClick={() => alert('RP 충전 페이지로 이동합니다.')}>RP 충전</button>  
           </div>
         </div>
-      ))
-  )}
-</div>
+        <div className='Store-Slide'>
+          <StoreSlied/>
+        </div>
+      <div className="icon-shop-title">아이콘 상점</div> {/* 이름표 추가 */}
+      <div className='icons-list'>
+      {icons.length === 0 ? (
+        <p>로딩 중...</p>
+          ) : (
+            icons
+              .filter((icon) => icon.IconID < 6 || icon.IconID > 8) // ID가 1에서 17 사이가 아닌 아이콘만 표시
+              .map((icon) => (
+                <div key={icon.id} className='icon-item'>
+                  <div className='icon-cover' onMouseEnter={() => {}} onMouseLeave={() => {}}>
+                    <img src={icon.iconFile} alt={icon.IconName} />
+                    <div className="icon-name-overlay">
+                      <div>{icon.IconName}</div>
+                      <div>{Math.round(icon.iconPrice)} 포인트</div>
+                      <button className="button-buy" onClick={() => handlePurchase(icon.IconID)}>구매하기</button>
+                    </div>
+                  </div>
+                </div>
+              ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

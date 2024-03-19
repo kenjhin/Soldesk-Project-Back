@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/App.css';
 import '../styles/Main.css';
-import DefaultIcon from '../assets/img/icons/Default.jpg';
+// import DefaultIcon from '../assets/img/icons/Default.jpg';
 import formatDate from '../components/function/formatDate';
 
 const Board = () => {
@@ -68,7 +68,7 @@ const Board = () => {
               </td>
               <td className="td_writer">
                 <div className="writer-container">
-                  <img src={post.IconURL || DefaultIcon} alt="User Icon" className="user-icon" />
+                  {/* <img src={post.IconURL || DefaultIcon} alt="User Icon" className="user-icon" /> */}
                   <span className="writer-name">{post.writer}</span>
                 </div>
               </td>
