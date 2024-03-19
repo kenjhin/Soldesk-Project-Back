@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useIcon } from '../../contexts/IconContext'; // IconContext 사용
 import { useUser } from '../../contexts/UserContext'; // UserContext 사용
 import '../../styles/IconSetModal.css';
 
-const IconSetModal = ({ img }) => {
-  const [modalOpen, setModalOpen] = useState(false);
+const IconSetModal = ({ img, modalOpen, setModalOpen }) => {
   const modalBackground = useRef();
   const { userIcons, setCurrentIcon,  } = useIcon(); // 사용자가 보유한 아이콘 목록 가져오기
   const { userData } = useUser(); // UserContext에서 유저 데이터 가져오기
@@ -23,7 +22,7 @@ const IconSetModal = ({ img }) => {
   return (
     <>
       <div className="icon-modal-btn-wrapper">
-        <button className="icon-modal-open-btn" onClick={() => setModalOpen(true)}>
+        <button className="icon-modal-open-btn">
           {img}
         </button>
       </div>

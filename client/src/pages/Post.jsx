@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext'; // UserContext 유저 데이터 받아옴.
 import '../styles/Post.css'
 
@@ -24,27 +24,26 @@ const Post = () => {
 
   // 게시글 Post 요청
  const handlePostSubmit = async () => {
-   
   if (!userData) {
       alert('로그인이 필요합니다.');
       navigate('/login');
       return;
     }
   
-    try {
-      await axios.post(`http://localhost:3001/api/posts`, {
-        title,
-        content,
-        boardId,
-        writerId: userData.username, // writer 대신 writerId를 사용하여 현재 로그인한 사용자의 ID 전송
-      });
-  
-      alert('게시글이 작성되었습니다.');
-      // 임시로 navigate 지정해놓음 일단.
-      navigate(`/board/${boardId}`);
-    } catch (error) {
-      console.error('게시글 작성 중 오류 발생:', error);
-      alert('게시글 작성에 실패했습니다.');
+  try {
+    await axios.post(`http://localhost:3001/api/posts`, {
+      title,
+      content,
+      boardId,
+      writerId: userData.username, // writer 대신 writerId를 사용하여 현재 로그인한 사용자의 ID 전송
+    });
+
+    alert('게시글이 작성되었습니다.');
+    // 임시로 navigate 지정해놓음 일단.
+    navigate(`/board/${boardId}`, { state: {boardId: boardId }});
+  } catch (error) {
+    console.error('게시글 작성 중 오류 발생:', error);
+    alert('게시글 작성에 실패했습니다.');
   }
 };
 
@@ -70,7 +69,7 @@ const Post = () => {
       </div>
       <div className='write-footer'>
         <div className='btnBox'>
-          <button onClick={handlePostSubmit}>글쓰기</button>
+          <button onClick={handlePostSubmit}>작성</button>
         </div>
       </div>
     </div>

@@ -298,6 +298,7 @@ app.post('/api/posts', (req, res) => {
 // 게시물 리스트 가져오기 GET
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
+
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
   const query = 'SELECT id, board_id, title, user_id, content, writer, created_at, views, likes FROM post WHERE board_id = ? ORDER BY created_at ASC';
   connection.query(query, [boardId], (error, results) => {
@@ -305,7 +306,7 @@ app.get('/api/posts/list', (req, res) => {
       console.error('Fetch posts error:', error);
       return res.status(500).json({ message: 'Error fetching posts' });
     }
-
+    
     res.json(results);
   });
 });

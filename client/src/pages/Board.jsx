@@ -16,14 +16,19 @@ const Board = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(`http://localhost:3001/api/posts/list?boardId=${boardId}`);
-        const data = await response.json();
-        setData(data); // 데이터가 배열 형태인지 확인 후 상태 업데이트
+        const json = await response.json();
+        setData(json); // 데이터가 배열 형태인지 확인 후 상태 업데이트
+        console.log(json);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
     fetchData();
   }, [boardId]);
+
+  useEffect(() => {
+
+  }, []);
 
   const totalPages = Math.ceil(data.length / postsPerPage);
   const indexOfLastPost = currentPage * postsPerPage;
@@ -52,9 +57,9 @@ const Board = () => {
             </tr>
           </thead>
           <tbody> 
-          {currentPosts.map((post, index) => (
+          {currentPosts.reverse().map((post, index) => (
             <tr key={index}>
-              <td className="td_id">{index + 1}</td> 
+              <td className="td_id">{post.id}</td> 
               <td className="td_title">
               <Link to={`/board/${post.board_id}/${post.id}`} state={{ post }}>
                 {post.title}

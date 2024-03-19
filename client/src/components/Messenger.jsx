@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import addPerson from "../assets/img/messenger/add_person_mask.png";
 import addFolder from "../assets/img/messenger/add_folder_mask.png";
 import search from "../assets/img/messenger/search_mask.png";
@@ -22,11 +22,12 @@ const Messenger = () => {
   // 그룹
   const [expandedGroups, setExpandedGroups] = useState();
   const [uniqueGroupNames, setUniqueGroupNames] = useState([]);
-
+  const recycleBin = useRef();
   // 친구
   const [userFriends, setUserFriends] = useState([]);
   const [addFriendModalShow, setAddFriendModalShow] = useState(false);
   const [friendRequest, setFriendRequest] = useState([]);
+  const dragItem = useRef();
 
   //채팅
   const [modalShow, setModalShow] = useState(false);
@@ -97,7 +98,6 @@ const Messenger = () => {
       try {
         const response = await axios.get('http://localhost:3001/friendRequest/receive', { withCredentials: true });
         setFriendRequest(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error('FriendRequest 로드 중 오류 발생:', error);
       }
@@ -132,8 +132,23 @@ const Messenger = () => {
     return sortedGroupNames;
   };
 
+  const dragStart = (e, position) => {
+    dragItem.current = position;
+  }
 
+  const dragEnter = (e, position) => {
+    recycleBin.current = position;
+  }
   
+  const drop = (e, a) => {
+   // const newFriends = [...userFriends];
+    console.log(`dragItem : ${dragItem}`);
+    console.log(`friends : ${a}`);
+    console.log(`recycleBin : ${recycleBin}`);
+    console.log(`recycleBin.current : ${recycleBin.current}`);
+  //  setUserFriends(newFriends);
+  }
+
   return (
     <div className="messenger">
       <div className="messengerHeaderBtnBox">
@@ -174,7 +189,12 @@ const Messenger = () => {
             userFriends
               .filter((data) => data.groupName === group)
               .map((friends, j) => (
-                <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
+                <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)} 
+                      draggable
+                      onDragStart={(e) => dragStart(e, friends)}
+                      onDragEnd={drop}
+                      onDragOver={(e)=> e.preventDefault()}
+                      onDragEnter={(e)=>dragEnter(e)}>
                   <div className='friend-icon'>
                     <img src={friends.iconURL || defaultIcon} alt='friend-icon' />
                   </div>
@@ -187,6 +207,9 @@ const Messenger = () => {
           )}
         </div>
       ))}
+        <div className="messenger-group-header" onDragEnter={(e)=>dragEnter(e)}>
+          <span>휴지통</span>
+        </div>
       </div>
       {/* 하단 채팅 버튼 누르면 채팅창열림 */}
       <div className='messengerFooterBtnBox'>
