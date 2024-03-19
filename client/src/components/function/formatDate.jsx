@@ -22,7 +22,9 @@ const formatDate = (isoDate, type) => {
   if(today===date){
     const hour = new Date(isoDate).getHours();
     const formattedHour = hour >= 24 ? '00' : String(hour).padStart(2, '0'); // 시간값이 24를 넘어가면 00으로 변경
-    formattedDateString1 = `${formattedHour}:${new Date(isoDate).getMinutes()}`;
+    const minutes = new Date(isoDate).getMinutes();
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes; // 분이 한 자리 수일 경우 앞에 0 추가
+    formattedDateString1 = `${formattedHour}:${formattedMinutes}`;
   } else{
     formattedDateString1 = `${year}.${month}.${day}.`
   }

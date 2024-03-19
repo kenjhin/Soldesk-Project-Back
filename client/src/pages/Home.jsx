@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, {  useEffect } from "react";
+import React, {  useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from '../contexts/UserContext';
@@ -29,6 +29,7 @@ import { useIcon } from "../contexts/IconContext";
 
 function Home({setLogined}) {
 
+  const [modalOpen, setModalOpen] = useState();
   const boardNames = ['자유게시판', '인기게시판', '이슈게시판', '기념게시판', '신고게시판'];
   const navigate = useNavigate();
   const { userData, setUserData } = useUser(); // UserContext의 유저 데이터와 세터 함수 사용
@@ -45,7 +46,6 @@ function Home({setLogined}) {
         const response = await axios.get('http://localhost:3001/userData', { withCredentials: true });
         if (response.data.success) {
           setUserData(response.data.user); // API 응답으로 받은 유저 데이터로 상태 업데이트
-          console.log(response.data)
         } else {
           console.log('유저 데이터 로드 실패');
         }
@@ -106,13 +106,14 @@ function Home({setLogined}) {
           </div>
           <div className="rightBtnBox">
             <MyInfoModal data={userData} setData={setUserData} />
-            <button className="inventoryBtn mouseover">
+            <button className="inventoryBtn mouseover"
+              onClick={() => setModalOpen(true)}>
               <img src={inventoryIco} alt="" />
             </button>
             <Link to="/store">
-            <button className="storeBtn mouseover">
-              <img src={storeIco} alt="/store" />
-            </button>     
+              <button className="storeBtn mouseover">
+                <img src={storeIco} alt="/store" />
+              </button>     
             </Link>
           </div>
           <div className="RpBox">
@@ -122,10 +123,12 @@ function Home({setLogined}) {
         </div>
         <div className="headerProfileBox">
         {userData && currentIcon && (
-    <IconSetModal
-      img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}
-    />
-  )}
+          <IconSetModal
+            img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}
+            modalOpen={modalOpen}
+            setModalOpen={setModalOpen}
+          />
+        )}
           {userData && (
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>

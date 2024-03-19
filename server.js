@@ -323,6 +323,7 @@ app.post('/api/posts', (req, res) => {
 // Post : 게시글 리스트 불러오기 기능
 app.get('/api/posts/list', (req, res) => {
   const { boardId } = req.query;
+
   // board_id에 해당하는 게시물 쿼리 전부 조회하기
   const query = `
     SELECT p.id, p.board_id, p.title, p.user_id, p.content, p.writer, p.created_at, p.views, p.likes, ui.IconID, ics.IconFile AS IconURL

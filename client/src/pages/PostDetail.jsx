@@ -109,15 +109,15 @@ const PostDetail = () => {
 
   // 2) 수정된 게시글 내용을 서버로 전송하는 로직
   const handleEditSave = async () => {
-  try {
-    await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
-      title: editedTitle,
-      content: editedContent,
-    });
-    alert('게시글이 수정되었습니다.');
-    setIsEditing(false); // 수정 모드 비활성화
-    navigate(`/board/${post?.board_id}`); // 게시글 목록 페이지로 리다이렉트
-  } catch (error) {
+    try {
+      await axios.put(`http://localhost:3001/api/posts/${post?.id}`, {
+        title: editedTitle,
+        content: editedContent,
+      });
+      alert('게시글이 수정되었습니다.');
+      setIsEditing(false); // 수정 모드 비활성화
+      navigate(`/board/${post?.board_id}`, { state: {boardId: post?.board_id }}); // 게시글 목록 페이지로 리다이렉트
+    } catch (error) {
       console.error('게시글 수정 중 오류 발생:', error);
       alert('게시글 수정에 실패했습니다.');
     }
@@ -160,7 +160,7 @@ const PostDetail = () => {
       try {
         await axios.delete(`http://localhost:3001/api/posts/${post?.id}`);
         alert('게시글이 삭제되었습니다.');
-        navigate(`/board/${post?.boardId}`); // 게시글 목록 페이지로 리다이렉트
+        navigate(`/board/${post?.boardId}`, { state: {boardId: post?.board_id }}); // 게시글 목록 페이지로 리다이렉트
       } catch (error) {
         console.error("게시글 삭제 중 오류 발생:", error);
         alert("게시글 삭제에 실패했습니다.");
@@ -255,7 +255,7 @@ const editComment = async (commentId) => {
             {/* 현재 post의 id와 일치하는 댓글만 필터링하여 출력 */}
             {/* 댓글 데이터가 동적으로 처리되도록 구현 필요 */}
             <div className="comments">
-              {comment.map((cmt) => (
+              {comment.reverse().map((cmt) => (
                 <div key={cmt.id} className="comment">
                 <img src={cmt.IconURL} alt="User Icon" />
                 <div className="comment-info">
