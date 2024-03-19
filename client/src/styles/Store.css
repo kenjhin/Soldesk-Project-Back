@@ -1,41 +1,188 @@
-div{
- color: white;
+/* App 전체 배경 및 텍스트 색상 조정 */
+body {
+  background-color: #000; /* 배경을 검은색으로 설정 */
+  color: #b5a642; /* 골드 색상의 텍스트 */
+  font-family: 'Helvetica', 'Arial', sans-serif;
 }
 
 .store-container {
-    text-align: center;
-  }
-  
-  .icons-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .icon-item {
-    width: 150px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .icon-item img {
-    width: 100%;
-    height: auto;
-  }
-  
-  .icon-item button {
-    margin-top: 10px;
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .icon-item button:hover {
-    background-color: #0056b3;
-  }
+  max-width: 1400px;
+  margin-top: 0; /* 상단 마진 제거 */
+  padding-top: 0; /* 상단 패딩 제거 */
+  padding: 0px 20px 20px; /* 상단 패딩 제거 후, 우, 하, 좌 패딩 유지 */
+
+}
+
+.My-Point {
+  background-color: #333;
+  color: #887f47;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 0px;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.My-Point h1 {
+  font-size: 30px;
+  margin-right: 10px;
+}
+
+.icons-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.icon-item {
+  background-color: #222;
+  color: #ffd700;
+  padding: 15px;
+  border-radius: 0px;
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+  min-height: 250px;
+  width: calc((100% - 60px) / 4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative; /* 오버레이를 위한 상대 위치 설정 */
+}
+
+.StoreAdminBtn, .button-buy {
+  background-color: rgb(248, 248, 243);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.StoreAdminBtn:hover, .button-buy:hover {
+  background-color: #fbf5e0;
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.icon-shop-banner {
+  background-color: #222;
+  color: #ffd700;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 0px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+  width: 100%;
+}
+
+.icon-shop-banner p {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+}
+
+.icon-cover img {
+  width: 100%; /* 컨테이너 너비에 맞게 조정 */
+  height: 100%; /* 컨테이너 높이에 맞게 조정 */
+  object-fit: cover; /* 이미지가 컨테이너를 꽉 채우도록 조정하면서 비율을 유지 */
+  border-radius: 0px; /* 이미지 모서리를 둥글게 처리 */
+
+}
+
+.icon-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  color: #fff;
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 내용을 정렬 */
+  justify-content: center;
+  align-items: center; /* 가운데 정렬 */
+  opacity: 0; /* 처음에는 투명하게 */
+  transition: opacity 1.0s ease; /* 서서히 나타나도록 설정 */
+  gap: 10px; /* 요소 사이의 간격 */
+}
+
+.icon-item:hover .icon-name-overlay {
+  opacity: 1; /* 마우스를 올리면 불투명하게 */
+}
+
+.store-top-right {
+  display: flex;
+  justify-content: space-between; /* 항목들을 양쪽 끝으로 정렬합니다 */
+  align-items: center;
+  padding: 20px;
+}
+
+.icon-shop-title {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  color: #fff;
+  text-align: center;
+  font-size: 24px;
+  padding: 10px;
+  margin-bottom: 20px; /* 아이콘 리스트와의 간격 */
+  opacity: 0.8;
+}
+
+/* 기존 CSS 스타일 */
+.store-top-right, .StoreAdminHandle, .My-Point, .icon-shop-title {
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  color: #fff; /* 흰색 글씨 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  padding: 10px;
+  margin-bottom: 20px; /* 요소들 간의 간격 */
+  font-size: 20px; /* 글씨 크기 조정 */
+  border-radius: 5px; /* 경계선 둥글게 */
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 상자 그림자 추가 */
+}
+
+.My-Point h1, .StoreAdminHandle button {
+  font-size: 18px; /* "보유RP"와 "아이콘 스토어 관리" 버튼의 글씨 크기 */
+  margin: 10px;
+}
+
+.StoreAdminHandle button {
+  background-color: rgba(0, 0, 0, 0.5); /* 초기 배경색을 반투명으로 설정 */
+  color: #fff; /* 흰색 글씨 */
+  border: none; /* 테두리 제거 */
+  padding: 5px 10px;
+  transition: all 0.3s ease;
+}
+
+.StoreAdminHandle button:hover {
+  background-color: #86836e30; /* 호버 시 배경색 변경 */
+  color: #fafafa; /* 호버 시 글씨색 변경 */
+  border-color: #f3f1ea36; /* 호버 시 테두리 색 변경 */
+}
+
+.Point-Charge {
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경으로 설정 */
+  color: #fff; /* 글씨 색상을 흰색으로 설정 */
+  border: none; /* 테두리 없앰 */
+  padding: 10px 20px; /* 내부 패딩 조정 */
+  margin-top: 10px; /* 위쪽 마진 추가하여 "보유RP" 섹션과 간격 생성 */
+  border-radius: 5px; /* 경계선을 둥글게 처리 */
+  cursor: pointer; /* 마우스 커서를 포인터로 변경 */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out; /* 배경색과 글씨색 변화에 대한 전환 효과 적용 */
+  display: block; /* 블록 레벨 요소로 만들어 전체 너비를 차지하도록 함 */
+  width: 100%; /* 버튼의 너비를 컨테이너의 너비에 맞춤 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2); /* 상자 그림자 추가 */
+}
+
+.Point-Charge:hover {
+  background-color: #ffd700; /* 마우스를 올렸을 때의 배경색 변경 */
+  color: #000; /* 마우스를 올렸을 때의 글씨 색상 변경 */
+}

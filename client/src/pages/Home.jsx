@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, {  useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,6 +8,8 @@ import "../styles/App.css";
 // img
 import storeIco from "../assets/img/home/nav-icon-store.png";
 import inventoryIco from "../assets/img/home/nav-icon-collections.png";
+import RpIco from "../assets/img/icon-rp-24.png";
+import RpIco2 from "../assets/img/icon-rp-gradient-32.png";
 // user_icon
 import icon_hamster from "../assets/img/icons/hamster.jpg";
 import icon_challenger from "../assets/img/icons/challenger.jpg";
@@ -42,6 +45,7 @@ function Home({setLogined}) {
         const response = await axios.get('http://localhost:3001/userData', { withCredentials: true });
         if (response.data.success) {
           setUserData(response.data.user); // API 응답으로 받은 유저 데이터로 상태 업데이트
+          console.log(response.data)
         } else {
           console.log('유저 데이터 로드 실패');
         }
@@ -111,12 +115,17 @@ function Home({setLogined}) {
             </button>     
             </Link>
           </div>
+          <div className="RpBox">
+            <div className="Rp-imgBox"><img src={RpIco2}/></div>
+            <div className="RpBoxFont"><span>{userData?.point}</span></div>
+          </div>
         </div>
         <div className="headerProfileBox">
-          {userData && (
-            <IconSetModal
-            img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}/>
-          )}
+        {userData && currentIcon && (
+    <IconSetModal
+      img={<img className="userIcon" src={currentIcon.IconURL} alt="현재 유저 아이콘" />}
+    />
+  )}
           {userData && (
           <div className="nameBox">
             <p className="nickname">{userData.nickname}</p>

@@ -16,6 +16,8 @@ function Login() {
   const [modalShow, setModalShow] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [stayLoggedIn, setStayLoggedIn] = useState(false); 
+
 
   function handleTextInputValueChange(value) {
     setUsername(value);
@@ -37,7 +39,8 @@ function Login() {
     try {
       const response = await axios.post('http://localhost:3001/login', {
         username,
-        password
+        password,
+        stayLoggedIn
       }, { withCredentials: true }); // 쿠키를 주고받기 위해 withCredentials 옵션 추가
 
       if (response.data.success) {
@@ -54,6 +57,11 @@ function Login() {
     }
   };
 
+  const StayLoggedInBox = (event) => {
+    setStayLoggedIn(event.target.checked);
+  };
+
+
   return (
     <div className="loginBody">
       <div className="loginArea">
@@ -63,7 +71,8 @@ function Login() {
           <TextInput label="계정이름" value={username} onInputChange={handleTextInputValueChange} onKeyDown={handleKeyDown}/>
           <TextInput label="비밀번호" type="password" value={password} onInputChange={handlePasswordChange} onKeyDown={handleKeyDown}/>
           <div className="idCheckboxContainer">
-            <label className="idCheckLabel"><input className="idCheckbox" type="checkbox"/>로그인 상태 유지</label>
+            <label className="idCheckLabel">
+              <input className="idCheckbox" type="checkbox"  checked={stayLoggedIn} onChange={StayLoggedInBox}/>로그인 상태 유지</label>
           </div>
         </div>
         <button className="loginBtnContainer" onClick={handleLoginClick} >

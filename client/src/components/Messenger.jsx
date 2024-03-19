@@ -4,10 +4,11 @@ import addPerson from "../assets/img/messenger/add_person_mask.png";
 import addFolder from "../assets/img/messenger/add_folder_mask.png";
 import search from "../assets/img/messenger/search_mask.png";
 import sort from "../assets/img/messenger/sort_mask.png";
-import defaultIcon from "../assets/img/hamster.jpg"
 import ChatModal from './modals/ChatModal';
 import getCurrentDateTime from './function/getCurrentDateTime';
 import AddFriendModal from './modals/AddFriendModal';
+import defaultIcon from '../assets/img/icons/Default.jpg';
+
 
 import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
@@ -17,7 +18,6 @@ import FriendRequests from './FriendRequests';
 const Messenger = () => {
   // context
   const { userData, setUserData } = useUser();
-  const { icons, setIcons } = useIcon();
 
   // 그룹
   const [expandedGroups, setExpandedGroups] = useState();
@@ -43,6 +43,7 @@ const Messenger = () => {
   };
   
   const openChatModal = (friendInfo) => {
+    console.log(friendInfo); // friendInfo 객체 구조 확인
     setChatTarget(friendInfo);
     setModalShow(true);
   };
@@ -70,7 +71,7 @@ const Messenger = () => {
     };
 
     fetchUserFriends();
-  }, [chatTarget]); // 친구 요청받거나 채팅바뀌거나할때마다 
+  }, [chatTarget, friendRequest]); // 친구 요청받거나 채팅바뀌거나할때마다 
 
   // myChat 받아오기
   useEffect(() => {
@@ -108,14 +109,14 @@ const Messenger = () => {
   // 그룹 관리
   useEffect(() => {
     // 친구 그룹 확장 여부 설정
-    const allGroupNames = [...new Set(userFriends.map((group) => group.group_name))];
+    const allGroupNames = [...new Set(userFriends.map((group) => group.groupName))];
     setExpandedGroups(allGroupNames);
     updateUniqueGroupNames();
   }, [userFriends]);
 
   // updateUniqueGroupNames
   const updateUniqueGroupNames = () => {
-    const newUniqueGroupNames = [...new Set(userFriends.map((group) => group.group_name))];
+    const newUniqueGroupNames = [...new Set(userFriends.map((group) => group.groupName))];
     const sortedGroupNames = sortGroupNames(newUniqueGroupNames);
     setUniqueGroupNames(sortedGroupNames);
   };
@@ -135,7 +136,6 @@ const Messenger = () => {
   
   return (
     <div className="messenger">
-      <FriendRequests friendRequest={friendRequest}/>
       <div className="messengerHeaderBtnBox">
         <p className="messengerText">커뮤니티</p>
         <button className="messengerHeaderBtn">
@@ -151,6 +151,10 @@ const Messenger = () => {
           <img src={addPerson} alt=''/>
         </button>
       </div>
+      <FriendRequests 
+        friendRequest={friendRequest}
+        setFriendRequest={setFriendRequest}
+      />
       {addFriendModalShow && 
       <AddFriendModal 
         show={addFriendModalShow} 
@@ -168,15 +172,15 @@ const Messenger = () => {
           </div>
           {expandedGroups.includes(group) && (
             userFriends
-              .filter((data) => data.group_name === group)
+              .filter((data) => data.groupName === group)
               .map((friends, j) => (
                 <div key={j} className='messenger-friend-list' onClick={() => openChatModal(friends)}>
                   <div className='friend-icon'>
-                    <img src={icons[friends.current_icon]} alt='friend-icon' />
+                    <img src={friends.iconURL || defaultIcon} alt='friend-icon' />
                   </div>
                   <div className='friend-info'>
                     <span className='friend-id'>{friends.nickname}</span>
-                    <span className='friend-profile-message'>{friends.profile_message}</span>
+                    <span className='friend-profile-message'>{friends.profileMessage}</span>
                   </div>
                 </div>
               ))
@@ -199,7 +203,6 @@ const Messenger = () => {
             setChatTarget={setChatTarget}
             currentChat={currentChat}
             setCurrentChat={setCurrentChat}
-            icons={icons}
             userFriends={userFriends}
           />
         )}
