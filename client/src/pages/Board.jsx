@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/App.css';
 import '../styles/Main.css';
+import DefaultIcon from '../assets/img/icons/Default.jpg';
 import formatDate from '../components/function/formatDate';
 
 const Board = () => {
@@ -65,7 +66,12 @@ const Board = () => {
                 {post.title}
               </Link>
               </td>
-              <td className="td_writer">{post.writer}</td>
+              <td className="td_writer">
+                <div className="writer-container">
+                  <img src={post.IconURL || DefaultIcon} alt="User Icon" className="user-icon" />
+                  <span className="writer-name">{post.writer}</span>
+                </div>
+              </td>
               <td className="td_date">{formatDate(post.created_at, 'postList')}</td>
               <td className="td_views">{post.views}</td>
               <td className="td_like">{post.likes}</td>

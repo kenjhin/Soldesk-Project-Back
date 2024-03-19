@@ -1,13 +1,25 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
 import myInfoIco from "../../assets/img/home/nav-icon-profile.png";
 import PostCode from '../PostCode';
 import "../../styles/MyInfoModal.css";
 
-const MyInfoModal = ({ data, setData }) => {
+const MyInfoModal = ( ) => {
   const [modalOpen, setModalOpen] = useState(false);
   const modalBackground = useRef();
   const [prevData, setPrevData] = useState();
-  
+  const { userData, setUserData } = useUser();
+
+  // 0) userEffect
+  useEffect(() => {
+    // 사용자 편의를 위해 유즈이펙트 사용해서 모달창 열고 닫을때 #비밀번호 확인 부분을 비워두겠습니다~!
+    if (modalOpen) {
+      setPrevData({ ...userData, confirmPassword: '' }); 
+    }
+  }, [modalOpen, userData]);
+
+
+  // 1) 유저데이터 prevDate Input
   const handleInputChange = (e, key) => {
     if(key!=='detailAddress'){
       setPrevData(() => ({
@@ -25,6 +37,8 @@ const MyInfoModal = ({ data, setData }) => {
     }
   };
 
+
+  // 2) 유저데이터(주소) prevDate Input
   const handleAddressSelected = (zonecode, fullAddress) => {
     setPrevData(() => ({
       ...prevData,
@@ -36,8 +50,10 @@ const MyInfoModal = ({ data, setData }) => {
     }));
   };
 
+
+  // 3-1) modal open
   const handleOpen = () => {
-    setPrevData(data || {
+    setPrevData(userData || {
       username: '',
       password: '',
       confirmPassword: '',
@@ -51,11 +67,15 @@ const MyInfoModal = ({ data, setData }) => {
     setModalOpen(true);
   };
 
+
+  // 3-2) modal close 
   const handleClose = () => {
     setModalOpen(false);
   };
 
-  const handleConfirmClick = () => {
+
+  // 4) setUserData = update logic Btn
+  const handleConfirmClick = async () => {
     if (!prevData.username || !prevData.password || !prevData.confirmPassword || !prevData.nickname || !prevData.address.zonecode || 
         !prevData.address.fullAddress || !prevData.address.detailAddress) {
       alert('모든 항목을 입력해주세요.');
@@ -68,14 +88,32 @@ const MyInfoModal = ({ data, setData }) => {
       return;
     }
 
-    // prevData의 address의 데이터 사이에 !!을 넣어서 합쳐주고 setData
-    setData(prevData);
-    // DB에 전송하기 data << 이거 보내면 됨
-    // DB전송함수
-    alert('저장되었습니다.')
+    try {
+      const response = await fetch('http://localhost:3001/updateMyInfo', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(prevData),
+        credentials: 'include',  // credentials : cookie로 사용자 식별하는 부분도 여기서 필요하답니다!
+      });
+  
+      const responseData = await response.json();
+      if (response.ok) {
+        alert('내 정보가 저장되었습니다.');
+        setUserData(prevData);
+        setModalOpen(false);
+      } else {
+        alert(responseData.message);
+      }
+    } catch (error) {
+      console.error('Error updating user info:', error);
+      alert('정보 업데이트 중 오류가 발생했습니다.');
+    }
 
   };
 
+  
   return (
     <>
       <button className="myInfoBtn mouseover" onClick={handleOpen}>

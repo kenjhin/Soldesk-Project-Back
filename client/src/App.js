@@ -6,6 +6,8 @@ import { UserProvider } from './contexts/UserContext';
 import { IconProvider } from "./contexts/IconContext";
 // css
 import "./styles/App.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 // img
 import hamster from "./assets/img/hamster.jpg";
 // pages
