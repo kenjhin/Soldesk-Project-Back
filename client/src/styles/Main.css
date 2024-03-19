@@ -69,6 +69,10 @@ td{
     flex-direction: column;
     align-items: center;
     overflow: scroll;
+    background-image: url('../assets/img/StoreBackground.jpg'); /* 배경 이미지 추가 */
+    background-size: cover; /* 이미지가 컨테이너를 꽉 채우도록 */
+    background-position: center center; /* 이미지가 컨테이너의 가운데에 위치하도록 */
+    background-repeat: no-repeat; /* 이미지 반복 없음 */
 }
 
 /* 스크롤바를 숨기는 스타일 */
