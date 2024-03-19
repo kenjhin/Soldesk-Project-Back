@@ -27,8 +27,8 @@ const storage = multer.diskStorage({
   const bodyParser = require('body-parser');
   const connection = mysql.createConnection({
     host     : 'localhost',
-    user     : 'soldesk',
-    password : '1234',
+    user     : 'root',
+    password : '5842',
     database : 'soldesk'
   });
 
